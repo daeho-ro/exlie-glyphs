@@ -329,7 +329,6 @@ html[lang='en'] h1 {
   opacity: 0.15;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath filter='url(%23n)' opacity='.42' d='M0 0h180v180H0z'/%3E%3C/svg%3E");
 }
-.plate-top,
 .plate-bottom,
 .output-head,
 .section-head,
@@ -339,29 +338,6 @@ html[lang='en'] h1 {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-}
-.plate-label {
-  font-size: 0.85rem;
-  letter-spacing: 0.02em;
-  color: #e6dfce;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.plate-label .icon {
-  color: #d3b58e;
-}
-.plate .select-box {
-  background: #343630;
-  border-color: #616158;
-  color: #f1eadc;
-  font-size: 0.83rem;
-}
-.plate .select-box select {
-  padding-top: 4px;
-  padding-bottom: 4px;
-  min-height: 32px;
-  max-width: 210px;
 }
 .inscription {
   position: relative;
@@ -888,10 +864,6 @@ main {
 .plate:after {
   opacity: 0.26;
 }
-.plate .select-box {
-  background: #20332c;
-  border-color: #827454;
-}
 .plate .inscription {
   min-height: 132px;
   margin: 3px 0;
@@ -1104,11 +1076,8 @@ h1 { font-size: clamp(1.7rem, 6vw, 2rem); }
 .work-grid, .workshop-view .work-grid { display: block; }
 .editor { border-radius: 9px; }
 .plate { padding: 12px 14px 6px; }
-.plate-top, .output-head { gap: 8px; }
-.plate-top > *, .output-head > * { min-width: 0; }
-.plate-label { gap: 5px; font-size: .83rem; white-space: nowrap; }
-.plate .select-box { max-width: 58%; }
-.plate .select-box select { max-width: 100%; min-height: 40px; }
+.output-head { gap: 8px; }
+.output-head > * { min-width: 0; }
 .plate .inscription {
   min-height: 83px;
   margin: 3px 0 5px;
@@ -1351,17 +1320,23 @@ footer .footer-links {
     border-radius: 14px 14px 0 0;
   }
 }
-.reading-controls {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
-}
-.reading-controls .select-box { max-width: none; }
-.reading-controls .select-box select { min-height: 44px; }
 .board-reveal {
+  width: fit-content;
+  margin: 0 auto 4px;
   padding-inline: 8px;
   white-space: nowrap;
   color: #ffe4b4;
   font-size: .85rem;
+}
+
+@media (max-width: 600px) {
+  /* Clip the board art without making either ancestor a scroll container. */
+  .editor:has(.board-slot:nth-child(17)),
+  #board:has(.board-slot:nth-child(17)) { overflow: clip; }
+  #board:has(.board-slot:nth-child(17)) .plate-bottom {
+    position: sticky;
+    bottom: env(safe-area-inset-bottom, 0px);
+    z-index: 2;
+    background: #25312a;
+  }
 }

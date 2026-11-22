@@ -17,12 +17,10 @@
           "'": '&#39;',
         })[ch],
     );
-  const names = { ko: '한국어', en: 'English', ja: '日本語' };
   const messages = {
     desk: ['만들기', 'Create', '作る'],
     dict: ['사전', 'Lexicon', '辞典'],
     title: ['유배지 문자열 생성기', 'Exile glyph generator', '流刑地の文字列メーカー'],
-    board: ['내 문자판', 'Your board', '文字盤'],
     examples: ['예문 고르기', 'Examples', '例文を選ぶ'],
     zone: ['구역', 'Zone', 'エリア'],
     photo: ['이미지 붙여넣기', 'Paste image', '画像をペースト'],
@@ -58,7 +56,6 @@
       'No matching signs.',
       '該当する記号はありません。',
     ],
-    to: ['풀이 언어', 'Reading language', '解読言語'],
     guide: [
       '문장 전체의 풀이를 보려면 예문을 고르세요.',
       'Choose an example to read the full sentence.',
@@ -122,7 +119,7 @@
     png: ['이미지 저장', 'Save image', '画像を保存'],
     export: ['내보내기', 'Export', '書き出す'],
     share: ['링크 공유', 'Share link', 'リンクを共有'],
-    labelLang: ['화면 언어', 'Interface language', '画面の言語'],
+    labelLang: ['언어', 'Language', '言語'],
     close: ['닫기', 'Close', '閉じる'],
     boardRef: [
       '바닥 문자 참고 자료',
@@ -140,8 +137,6 @@
       '<path d="M12 16V3m-4 4 4-4 4 4M7 10H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-2"/>',
     read: '<path d="M3 5c3-1 6-1 9 1v14c-3-2-6-2-9-1zm9 1c3-2 6-2 9-1v14c-3-1-6-1-9 1"/>',
     write: '<path d="m4 16-1 5 5-1L20 8l-4-4zM13.5 6.5l4 4"/>',
-    translate:
-      '<path d="M3 5h12M9 3v2M5 8c2 4 4.2 6.2 7 8m1-11c-1.1 5.2-4.3 9-9 12m10 4 4-11 4 11m-7-3h6"/>',
     grid: '<rect x="3" y="3" width="7" height="7" rx="1.3"/><rect x="14" y="3" width="7" height="7" rx="1.3"/><rect x="3" y="14" width="7" height="7" rx="1.3"/><rect x="14" y="14" width="7" height="7" rx="1.3"/>',
     tile: '<path d="m12 2 8 5v10l-8 5-8-5V7zM8 12l4-3 4 3-4 3z"/>',
     undo: '<path d="m9 7-5 5 5 5m-5-5h10a5 5 0 0 0 5-5"/>',
@@ -167,11 +162,11 @@
       localStorage.setItem(key, value);
     } catch {}
   };
-  const chooseLang = (value) => (Object.hasOwn(names, value) ? value : 'ko');
-  const loc = chooseLang(saved('exile-ui') || navigator.language.split('-')[0]);
+  const chooseLang = (value) => (reader.languages.includes(value) ? value : 'ko');
+  const savedLocale = saved('exile-ui');
+  let hasLocalePreference = reader.languages.includes(savedLocale);
   const state = {
-    loc,
-    to: chooseLang(saved('exile-read') || loc),
+    loc: hasLocalePreference ? savedLocale : chooseLang(navigator.language.split('-')[0]),
     page: 'desk',
     ids: [],
     selected: null,
@@ -212,21 +207,11 @@
     clearTimeout(toast.timer);
     toast.timer = setTimeout(() => el.classList.remove('show'), 2000);
   }
-  function langs() {
-    return `<label class="select-box"><select id="target" aria-label="${txt('to')}">${Object.entries(
-      names,
-    )
-      .map(
-        ([l, n]) =>
-          `<option value="${l}" ${state.to === l ? 'selected' : ''}>${n}</option>`,
-      )
-      .join('')}</select></label>`;
-  }
   function plate(ids) {
     const signs = words(ids).map((word, index) => {
       return `<button type="button" class="board-slot" data-slot="${index}" aria-pressed="${index === state.selected}">
         ${glyph(word)}<span class="slot-order">${txt('sign')} ${index + 1}</span>
-        <span class="slot-meaning" lang="${state.to}">${esc(word.labels[state.to])}</span></button>`;
+        <span class="slot-meaning" lang="${state.loc}">${esc(word.labels[state.loc])}</span></button>`;
     }).join('');
     const previous = state.history.at(-1);
     const selected = state.selected !== null;
@@ -237,12 +222,11 @@
       !selected && ids.length > 1 && `<button data-act="clear">${txt('clear')}</button>`,
       !selected && canRestore && `<button data-act="restore">${txt('restore')}</button>`,
     ].filter(Boolean).join('');
-    const example = ids.length ? reader.read(ids, state.to).example : null;
-    return `<section class="plate" id="board" data-revealed="${state.revealed}"><div class="plate-top">
-      <span class="plate-label">${txt('board')}</span>
-      ${ids.length ? `<div class="reading-controls"><button type="button" class="board-reveal" data-act="reveal" aria-controls="board-reading" aria-expanded="${state.revealed}">${txt(state.revealed ? 'hide' : 'show')}</button>${langs()}</div>` : ''}</div>
-      <div id="board-reading"><div id="board-signs" class="inscription" data-long="${ids.length > 5}">${signs || `<span class="plate-empty">${txt('empty')}</span>`}</div>
-      ${example ? `<p class="board-example" lang="${state.to}">${esc(example.texts[state.to])}</p>` : ''}</div>
+    const example = ids.length ? reader.read(ids, state.loc).example : null;
+    return `<section class="plate" id="board" data-revealed="${state.revealed}">
+      <div id="board-reading"><div id="board-signs" class="inscription" data-long="${ids.length > 5}">${signs || `<span class="plate-empty">${txt('empty')}</span>`}</div></div>
+      ${ids.length ? `<button type="button" class="board-reveal" data-act="reveal" aria-controls="board-reading${example ? ' board-example' : ''}" aria-expanded="${state.revealed}">${txt(state.revealed ? 'hide' : 'show')}</button>` : ''}
+      ${example ? `<p class="board-example" id="board-example" lang="${state.loc}">${esc(example.texts[state.loc])}</p>` : ''}
       ${ids.length || editTools ? `<div class="plate-bottom">
         ${ids.length ? `<button type="button" class="board-export" data-act="export" aria-haspopup="dialog" aria-controls="dialog">${ico('share')}${txt('export')}</button>` : ''}
         <div class="plate-tools">${editTools}</div></div>` : ''}</section>`;
@@ -321,8 +305,9 @@
   async function saveCard(button) {
     button.disabled = true;
     try {
-      const blob = await share.png(state.ids.slice(), state.to);
+      const blob = await share.png(state.ids.slice(), state.loc);
       share.download(blob);
+      window.dataLayer?.push({ event: 'glyph_card_save' });
     } catch (error) {
       toast(tr(error?.code === 'board-too-dense' ? 'denseImage' : 'saveFailed'));
     } finally {
@@ -335,10 +320,11 @@
         toast(tr('shareFileHint'));
         return;
       }
-      const url = share.createBoardLink(state.ids, state.to);
+      const url = share.createBoardLink(state.ids, state.loc);
       if (navigator.share) {
         try {
           await navigator.share({ title: 'Exile Glyphs', url });
+          window.dataLayer?.push({ event: 'glyph_link_share' });
           return;
         } catch (error) {
           if (error.name === 'AbortError') return;
@@ -346,6 +332,7 @@
       }
       try {
         await navigator.clipboard.writeText(url);
+        window.dataLayer?.push({ event: 'glyph_link_share' });
         toast(tr('linkCopied'));
       } catch {
         modal('share', `<p>${txt('linkManual')}</p><a class="btn" href="${esc(url)}">${txt('puzzleLink')}</a>`);
@@ -355,9 +342,16 @@
     }
   }
   let activeHash;
+  function syncBoardHash() {
+    const canonical = share.boardHash(state.ids, state.loc);
+    if (location.hash !== canonical) {
+      activeHash = canonical;
+      location.replace(canonical);
+    }
+  }
   function openPage(page) {
     if (state.page === page) return;
-    const hash = page === 'dict' ? '#dict' : state.shared ? share.boardHash(state.ids, state.to) : '';
+    const hash = page === 'dict' ? '#dict' : state.shared ? share.boardHash(state.ids, state.loc) : '';
     activeHash = hash;
     if (location.hash !== hash) location.hash = hash;
     state.page = page;
@@ -371,22 +365,18 @@
     state.page = activeHash === '#dict' ? 'dict' : 'desk';
     if (activeHash.startsWith('#b=')) {
       const board = share.readBoardLink(activeHash);
-      if (board && fromDictionary && state.shared && activeHash === share.boardHash(state.ids, state.to)) {
-        render();
-        return;
+      const continuing = board && fromDictionary && state.shared &&
+        activeHash === share.boardHash(state.ids, board.lang);
+      if (!continuing) {
+        state.ids = board?.ids || [];
+        state.selected = null;
+        state.history = [];
+        state.shared = Boolean(board);
+        state.revealed = !board;
       }
-      state.ids = board?.ids || [];
-      state.selected = null;
-      state.history = [];
-      state.shared = Boolean(board);
-      state.revealed = !board;
       if (board) {
-        state.to = chooseLang(board.lang);
-        const canonical = share.boardHash(board.ids, board.lang);
-        if (activeHash !== canonical) {
-          activeHash = canonical;
-          location.replace(canonical);
-        }
+        if (!hasLocalePreference) state.loc = chooseLang(board.lang);
+        syncBoardHash();
       } else {
         toast(tr('invalid'));
       }
@@ -503,6 +493,7 @@
         break;
       case 'reveal':
         state.revealed = !state.revealed;
+        if (state.revealed) window.dataLayer?.push({ event: 'glyph_reading_show' });
         $('board').dataset.revealed = String(state.revealed);
         button.setAttribute('aria-expanded', String(state.revealed));
         button.textContent = tr(state.revealed ? 'hide' : 'show');
@@ -513,17 +504,10 @@
     const el = e.target;
     if (el.id === 'locale') {
       state.loc = chooseLang(el.value);
+      hasLocalePreference = true;
       save('exile-ui', state.loc);
+      if (state.shared && state.page === 'desk') syncBoardHash();
       render();
-    }
-    if (el.id === 'target') {
-      state.to = chooseLang(el.value);
-      save('exile-read', state.to);
-      if (state.shared) {
-        activeHash = share.boardHash(state.ids, state.to);
-        location.replace(activeHash);
-      }
-      refreshBoard();
     }
     if (el.id === 'example' && el.value !== '') {
       updateIds(reader.examples[Number(el.value)].ids);

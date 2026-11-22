@@ -2,6 +2,24 @@
 <html lang="ko">
   <head>
     <meta charset="utf-8" />
+    <script id="exile-gtm-bootstrap">
+      (() => {
+        if (location.protocol !== 'https:' || location.hostname !== 'exile-glyphs.net') return;
+        if (document.getElementById('exile-gtm-container')) return;
+
+        const layer = window.dataLayer = window.dataLayer || [];
+        function gtag() { layer.push(arguments); }
+        gtag('set', 'page_location', location.origin + location.pathname);
+        layer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+
+        const first = document.getElementsByTagName('script')[0];
+        const tag = document.createElement('script');
+        tag.id = 'exile-gtm-container';
+        tag.async = true;
+        tag.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-NJCDQB8H';
+        first.parentNode.insertBefore(tag, first);
+      })();
+    </script>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="theme-color" content="#f7f5ef" />
     <meta

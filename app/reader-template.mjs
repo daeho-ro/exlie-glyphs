@@ -5,6 +5,7 @@ import { join } from 'node:path';
 // Only local asset paths differ in the hosted build.
 const html = readFileSync(join(process.cwd(), 'dist/index.html'), 'utf8');
 
+export const tagManager = html.match(/<script id="exile-gtm-bootstrap">([\s\S]*?)<\/script>/)[1];
 export const body = html.match(/<body>([\s\S]*?)<\/body>/)[1]
   .replace(/\bsrc="([^":]+)"/g, 'src="./reader/$1"');
 export const title = html.match(/<title>(.*?)<\/title>/)[1];
