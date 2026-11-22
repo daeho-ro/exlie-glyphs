@@ -150,7 +150,94 @@
   });
   if (empty.cells.length) throw new Error("An empty band near artwork produced glyphs.");
 
+  const rows = [
+    ["bird", "eat", "spider", "four", "snake"],
+    ["cow", "grass"],
+  ];
+  function printPage(angle, expectedRows) {
+    const page = document.createElement("canvas");
+    page.width = 775;
+    page.height = 420;
+    const draw = page.getContext("2d");
+    const paper = draw.createLinearGradient(0, 0, page.width, page.height);
+    paper.addColorStop(0, "#dce0dc");
+    paper.addColorStop(1, "#faf5ea");
+    draw.fillStyle = paper;
+    draw.fillRect(0, 0, page.width, page.height);
+    draw.fillStyle = "#403f41";
+    draw.font = "90px ExileGlyphs";
+    draw.textAlign = "center";
+    expectedRows.forEach((ids, row) => {
+      draw.save();
+      draw.translate(row ? 220 : 50, 200 + row * 140);
+      draw.rotate(angle);
+      ids.forEach((id, column) => draw.fillText(byId.get(id).glyph, 52 + column * 102, 32));
+      draw.restore();
+    });
+    return page;
+  }
+  async function readPage(page, expectedRows, description) {
+    const suggested = await ExileOCR.suggestLines(page);
+    if (suggested.length !== expectedRows.length) {
+      throw new Error("Expected " + expectedRows.length + " lines on " + description +
+        ", found " + suggested.length + ": " + JSON.stringify(suggested));
+    }
+    const recognized = [];
+    for (const geometry of suggested) {
+      const result = await ExileOCR.recognize(page, geometry);
+      recognized.push(result.cells.map(cell => cell.candidates[0]?.id));
+    }
+    if (JSON.stringify(recognized) !== JSON.stringify(expectedRows)) {
+      throw new Error("Wrong lines, glyphs or order on " + description + ": " + JSON.stringify(recognized));
+    }
+  }
+  for (const [angle, expectedRows] of [[0, rows], [-0.24, rows], [0, rows.slice(0, 1)]]) {
+    await readPage(printPage(angle, expectedRows), expectedRows, "a page at " + angle + " radians");
+  }
+  const titledRows = [rows[0], ["cow", "eat", "grass"]];
+  const titledPage = document.createElement("canvas");
+  titledPage.width = 720;
+  titledPage.height = 510;
+  const titlePen = titledPage.getContext("2d");
+  titlePen.fillStyle = "#f9f6ed";
+  titlePen.fillRect(0, 0, titledPage.width, titledPage.height);
+  titlePen.fillStyle = "#3d3a37";
+  titlePen.font = "100px ExileGlyphs";
+  titlePen.textAlign = "center";
+  titlePen.translate(80, 168);
+  titlePen.rotate(-0.13);
+  titledRows.forEach((row, y) => row.forEach((id, x) => {
+    titlePen.fillText(byId.get(id).glyph, 100 * x, 164 * y);
+  }));
+  titlePen.resetTransform();
+  titlePen.fillStyle = "#8d877d";
+  titlePen.font = "19px sans-serif";
+  titlePen.fillText("Good morning", 120, 40);
+  await readPage(titledPage, titledRows, "a tilted page with a small heading");
+
+  // An exported card has a heading and may include reading labels under each row.
+  const fullRow = [...rows[0], "person"];
+  for (const [lastRow, showReading] of [[["cow"], false], [rows[1], true]]) {
+    const card = await createImageBitmap(await ExileShare.png([...fullRow, ...lastRow], "en", showReading));
+    try {
+      await readPage(card, [fullRow, lastRow], "an exported two-line card");
+    } finally {
+      card.close();
+    }
+  }
+  if ((await ExileOCR.suggestLines(printPage(0, []))).length) {
+    throw new Error("The blank page produced a line.");
+  }
+  const cancelled = new AbortController();
+  cancelled.abort();
+  try {
+    await ExileOCR.suggestLines(printPage(0, rows), {signal: cancelled.signal});
+    throw new Error("Cancelled line detection completed.");
+  } catch (error) {
+    if (error.name !== "AbortError") throw error;
+  }
+
   document.getElementById("status").textContent = "PASS printed rows (" + checked.join(", ")
-    + "), two pencil sketches, three localized cards, blank slots and an empty selection.";
+    + "), two pencil sketches, three localized cards, blank slots, an empty selection and ordered multi-line pages.";
 })().catch(error => {document.getElementById("status").textContent = "FAIL " + error.message;});
 </script>

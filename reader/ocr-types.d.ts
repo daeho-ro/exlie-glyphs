@@ -28,6 +28,7 @@ interface Window {
   ExileOCR: {
     recognize(image: OcrImage, options: OcrOptions): Promise<OcrResult>;
     suggestLine(image: OcrImage, options?: { signal?: AbortSignal }): Promise<OcrLine>;
+    suggestLines(image: OcrImage, options?: { signal?: AbortSignal }): Promise<OcrLine[]>;
   };
   ExilePhotoReader: { open(locale: ReaderLocale, apply: (ids: string[]) => void, initialFile?: Blob): void };
   ExileClipboard: {

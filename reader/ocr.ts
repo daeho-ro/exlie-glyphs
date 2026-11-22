@@ -1,4 +1,4 @@
-/* Local shape matching for a single, approximately straight line of glyphs. */
+/* Local shape matching for approximately straight lines of glyphs. */
 (() => {
   "use strict";
   type Span = [number, number];
@@ -7,6 +7,12 @@
   type Features = NonNullable<ReturnType<typeof feature>>;
   interface Template { id: string; features: Features; tip: number | null }
   interface HorizontalRow { h: number; baseline: number; weight: number; geometry: OcrLine }
+  interface LineMatch {
+    line: OcrLine;
+    merit: number;
+    glyphHeight: number;
+    single: boolean;
+  }
   const SIZE = 40;
   const nextFrame = () => new Promise<void>(resolve => setTimeout(resolve, 0));
   const clamp = (x: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, x));
@@ -501,8 +507,7 @@
     const pt=(u: number)=>({x:clamp((mx+u*dx-v*dy)/scale,0,width),y:clamp((my+u*dy+v*dx)/scale,0,height)});
     return {start:pt(u0-heightWork*.15),end:pt(u1+heightWork*.15),height:heightWork*1.35/scale,estimated:true};
   }
-  function horizontalLines(components: Component[], canvas: HTMLCanvasElement, scale: number) {
-    const {width,height}=canvas;
+  function horizontalLines(components: InkBox[], width: number, height: number, scale: number) {
     const groups=components.filter(g=>g.n>=5&&g.x1-g.x0<width*.65&&g.y1-g.y0<height*.65);
     const roots=groups.filter(g=>{
       const w=g.x1-g.x0+1,h=g.y1-g.y0+1;
@@ -528,39 +533,236 @@
     }
     return rows;
   }
+  function angleOf(line: OcrLine) {
+    return Math.atan2(line.end.y - line.start.y, line.end.x - line.start.x);
+  }
+
+  function yAt(line: OcrLine, x: number) {
+    const width = line.end.x - line.start.x;
+    return width ? line.start.y + (x - line.start.x) * (line.end.y - line.start.y) / width : line.start.y;
+  }
+
+  // An alignment across many nearby, similarly sized marks estimates the common
+  // angle of handwritten rows, even when no one row dominates the photograph.
+  function commonAngles(components: Component[], width: number, height: number) {
+    const imageSpan = Math.min(width, height);
+    const roots = components.filter(mark => {
+      const w = mark.x1 - mark.x0 + 1, h = mark.y1 - mark.y0 + 1;
+      return h >= 5 && w > 1 && h < imageSpan * .32 && w / h > .16 && w / h < 2.6 && mark.n >= h * 1.3;
+    }).sort((a, b) => b.n - a.n).slice(0, 180).sort((a, b) => a.x - b.x);
+    const step = .045, radius = 19;
+    const weights = new Float64Array(radius * 2 + 1);
+    const angles = new Float64Array(weights.length);
+    for (let i = 0; i < roots.length; i++) {
+      const first = roots[i], h = first.y1 - first.y0 + 1;
+      for (let j = i + 1; j < roots.length; j++) {
+        const second = roots[j], dx = second.x - first.x;
+        if (dx > h * 4.5) break;
+        const otherHeight = second.y1 - second.y0 + 1;
+        if (dx < h * .83 || otherHeight < h * .53 || otherHeight > h * 1.8) continue;
+        const angle = Math.atan2(second.y1 - first.y1, dx);
+        const bin = Math.round(angle / step) + radius;
+        if (bin < 0 || bin >= weights.length) continue;
+        const weight = Math.sqrt(Math.min(first.n, second.n)) * Math.min(h, otherHeight) * Math.min(1, h * 2 / dx);
+        weights[bin] += weight;
+        angles[bin] += angle * weight;
+      }
+    }
+    const peaks = Array.from({ length: weights.length - 2 }, (_, i) => i + 1).map(bin => ({
+      bin, score: (weights[bin] + .65 * (weights[bin - 1] + weights[bin + 1])) * (1 - Math.abs(bin - radius) * .012),
+    })).sort((a, b) => b.score - a.score);
+    const result: number[] = [];
+    for (const { bin, score } of peaks) {
+      if (!score || score < peaks[0].score * .48 || result.length >= 3) break;
+      const total = weights[bin - 1] + weights[bin] + weights[bin + 1];
+      const angle = (angles[bin - 1] + angles[bin] + angles[bin + 1]) / total;
+      if (result.every(other => Math.abs(other - angle) > .115)) result.push(angle);
+    }
+    return result;
+  }
+
+  function rowProposals(components: InkBox[], width: number, height: number, scale: number) {
+    const size = (mark: InkBox) => mark.y1 - mark.y0 + 1;
+    const minSide = Math.min(width, height);
+    const marks = components.filter(mark => {
+      const w = mark.x1 - mark.x0 + 1, h = size(mark);
+      return mark.n >= 3 && w < minSide * .49 && h < minSide * .38 && w / h < 8;
+    });
+    const bodies = marks.filter(mark => {
+      const w = mark.x1 - mark.x0 + 1, h = size(mark);
+      return h >= 6 && w / h > .15 && w / h < 2.8 && mark.n >= h * 1.3;
+    }).sort((a, b) => size(b) - size(a));
+    const rows: HorizontalRow[] = [];
+    const tallest = bodies[0] ? size(bodies[0]) : 0;
+    for (const seed of bodies.slice(0, 160)) {
+      const h = size(seed), baseline = seed.y1;
+      if (h < tallest * .24) break;
+      if (rows.some(row => Math.abs(row.baseline - baseline) < h * .18 && Math.abs(row.h - h) < h * .28)) continue;
+      const aligned = bodies.filter(body => size(body) > h * .52 && size(body) < h * 1.48 && Math.abs(body.y1 - baseline) < h * .28);
+      const attached = marks.filter(mark => size(mark) <= h * .51 && aligned.some(body => {
+        const center = (mark.x0 + mark.x1) / 2;
+        if (center < body.x0 - h * .23 || center > body.x1 + h * .23) return false;
+        // Include dots and detached strokes immediately next to the glyph body.
+        return (mark.y1 <= body.y0 + h * .13 && mark.y0 >= body.y0 - h * .55) ||
+          (mark.y0 >= body.y1 - h * .07 && mark.y1 <= body.y1 + h * .3);
+      }));
+      const pieces = [...aligned, ...attached];
+      const x0 = Math.min(...pieces.map(mark => mark.x0)), x1 = Math.max(...pieces.map(mark => mark.x1));
+      const y0 = Math.min(...pieces.map(mark => mark.y0)), y1 = Math.max(...pieces.map(mark => mark.y1));
+      const center = (y0 + y1) / 2 / scale;
+      const pad = Math.max(2, h * .125);
+      rows.push({ h, baseline, weight: h * Math.sqrt(Math.min(aligned.length, 12)), geometry: {
+        start: { x: Math.max(0, x0 - pad) / scale, y: center },
+        end: { x: Math.min(width, x1 + 1 + pad) / scale, y: center },
+        height: (y1 - y0 + 1 + 2 * pad) / scale,
+        estimated: true,
+      } });
+    }
+    return rows;
+  }
+
+  function angledLines(components: Component[], width: number, height: number, scale: number, angle: number) {
+    if (Math.abs(angle) < .035) {
+      return [...rowProposals(components, width, height, scale), ...horizontalLines(components, width, height, scale)];
+    }
+    const dx = Math.cos(angle), dy = Math.sin(angle);
+    const offsetX = Math.min(0, height * dy), offsetY = Math.min(0, -width * dy);
+    const rotated = components.map(({ pixels, n }) => {
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (const pixel of pixels) {
+        const x = pixel % width, y = Math.floor(pixel / width);
+        const u = x * dx + y * dy - offsetX, v = y * dx - x * dy - offsetY;
+        x0 = Math.min(x0, u);
+        x1 = Math.max(x1, u);
+        y0 = Math.min(y0, v);
+        y1 = Math.max(y1, v);
+      }
+      return { x0, y0, x1, y1, n };
+    });
+    const inverse = (point: OcrPoint): OcrPoint => {
+      const x = point.x + offsetX / scale, y = point.y + offsetY / scale;
+      return { x: x * dx - y * dy, y: x * dy + y * dx };
+    };
+    const rotatedWidth = width * dx + height * Math.abs(dy), rotatedHeight = height * dx + width * Math.abs(dy);
+    const rows = [...rowProposals(rotated, rotatedWidth, rotatedHeight, scale), ...horizontalLines(rotated, rotatedWidth, rotatedHeight, scale)];
+    return rows.map(row => ({ ...row, geometry: {
+        ...row.geometry, start: inverse(row.geometry.start), end: inverse(row.geometry.end),
+      } }));
+  }
+
+  function scanPhoto(img: OcrImage, maxSpan = 620) {
+    const [width, height] = sizeOf(img), scale = Math.min(1, maxSpan / Math.max(width, height));
+    const canvas = surface(Math.max(1, Math.round(width * scale)), Math.max(1, Math.round(height * scale)));
+    const ctx = context2d(canvas);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const normal = connected(maskOf(canvas), canvas.width, canvas.height);
+    const opposite = connected(maskOf(canvas, true), canvas.width, canvas.height);
+    return { width, height, scale, canvas, normal, opposite };
+  }
+
+  async function lineMatch(img: OcrImage, line: OcrLine, signal?: AbortSignal, allowSmallSingle = false): Promise<LineMatch | null> {
+    signal?.throwIfAborted();
+    const sample = await recognize(img, { ...line, signal, probe: true });
+    const scores = sample.cells.map(cell => cell.candidates[0]?.score || 0);
+    const strong = sample.cells.filter(cell => cell.whole && (cell.candidates[0]?.score ?? 0) > .56).length;
+    const mean = scores.reduce((a, b) => a + b, 0) / Math.max(1, scores.length);
+    const [width, height] = sizeOf(img);
+    const single = scores.length === 1 && strong === 1 &&
+      line.end.x - line.start.x < line.height * 1.8 &&
+      (mean > .78 && line.height > Math.min(width, height) * .19 || allowSmallSingle && mean > .84);
+    if (!single && (scores.length < 2 || strong < Math.max(2, Math.ceil(scores.length * .2)) || mean < .455)) return null;
+    const sizes = sample.cells.flatMap(cell => cell.whole && cell.inkHeight !== undefined ? [cell.inkHeight] : []).sort((a, b) => a - b);
+    const glyphHeight = line.height * sizes[Math.floor(sizes.length / 2)];
+    const merit = mean * mean * Math.sqrt(glyphHeight * strong) * Math.min(1, scores.length / 3);
+    return { line, merit, glyphHeight, single };
+  }
+
   async function suggestLine(img: OcrImage, {signal}: {signal?: AbortSignal} = {}): Promise<OcrLine> {
-    await nextFrame();signal?.throwIfAborted();
-    const [width,height]=sizeOf(img),scale=Math.min(1,620/Math.max(width,height));
-    const c=surface(Math.max(1,Math.round(width*scale)),Math.max(1,Math.round(height*scale)));
-    const ctx=context2d(c);
-    ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(img,0,0,c.width,c.height);
-    const normal=connected(maskOf(c),c.width,c.height);
-    const tilted=await estimateGeometry(img,c,normal,scale,signal);
-    const opposite=connected(maskOf(c,true),c.width,c.height);
-    const lines=[...horizontalLines(normal,c,scale),...horizontalLines(opposite,c,scale)].sort((a,b)=>b.weight-a.weight);
-    const choices: OcrLine[]=[];
-    if(tilted.estimated)choices.push(tilted);
-    if(width>height*12)choices.push({start:{x:0,y:height/2},end:{x:width,y:height/2},height,estimated:true});
-    for(const {geometry:g} of lines) {
-      if(choices.some(p=>Math.abs(g.start.y-p.start.y)<g.height*.12&&Math.abs(g.height-p.height)<g.height*.18&&Math.abs(g.start.x-p.start.x)<g.height*.4))continue;
-      choices.push(g);
-      if(choices.length>=8)break;
+    await nextFrame(); signal?.throwIfAborted();
+    const { width, height, scale, canvas, normal, opposite } = scanPhoto(img);
+    const tilted = await estimateGeometry(img, canvas, normal, scale, signal);
+    const lines = [
+      ...horizontalLines(normal, canvas.width, canvas.height, scale),
+      ...horizontalLines(opposite, canvas.width, canvas.height, scale),
+    ].sort((a, b) => b.weight - a.weight);
+    const choices: OcrLine[] = [];
+    if (tilted.estimated) choices.push(tilted);
+    if (width > height * 12) choices.push({ start: { x: 0, y: height / 2 }, end: { x: width, y: height / 2 }, height, estimated: true });
+    for (const { geometry: line } of lines) {
+      if (choices.some(other => Math.abs(line.start.y - other.start.y) < line.height * .12 &&
+          Math.abs(line.height - other.height) < line.height * .18 &&
+          Math.abs(line.start.x - other.start.x) < line.height * .4)) continue;
+      choices.push(line);
+      if (choices.length >= 8) break;
     }
-    let winner=null,best=0;
-    for(const g of choices){
-      signal?.throwIfAborted();
-      const sample=await recognize(img,{...g,signal,probe:true});
-      const scores=sample.cells.map(cell=>cell.candidates[0]?.score||0);
-      const strong=sample.cells.filter(cell=>cell.whole&&(cell.candidates[0]?.score ?? 0)>.56).length;
-      const mean=scores.reduce((a,b)=>a+b,0)/Math.max(1,scores.length);
-      const single=scores.length===1&&strong===1&&mean>.78&&g.height>Math.min(width,height)*.19&&g.end.x-g.start.x<g.height*1.8;
-      if(!single&&(scores.length<2||strong<Math.max(2,Math.ceil(scores.length*.2))||mean<.455))continue;
-      const sizes=sample.cells.flatMap(cell=>cell.whole && cell.inkHeight !== undefined ? [cell.inkHeight] : []).sort((a,b)=>a-b);
-      const printedHeight=g.height*sizes[Math.floor(sizes.length/2)];
-      const merit=mean*mean*Math.sqrt(printedHeight*strong)*Math.min(1,scores.length/3);
-      if(merit>best){best=merit;winner=g;}
+    let winner: LineMatch | null = null;
+    for (const line of choices) {
+      const match = await lineMatch(img, line, signal);
+      if (match && (!winner || match.merit > winner.merit)) winner = match;
     }
-    return winner||{start:{x:width*.12,y:height*.5},end:{x:width*.88,y:height*.5},height:height*.15,estimated:false};
+    return winner?.line || { start: { x: width * .12, y: height * .5 }, end: { x: width * .88, y: height * .5 }, height: height * .15, estimated: false };
+  }
+
+  function sameProposal(a: OcrLine, b: OcrLine) {
+    const tolerance = Math.min(a.height, b.height) * .25;
+    return Math.abs(a.start.x - b.start.x) < tolerance && Math.abs(a.end.x - b.end.x) < tolerance &&
+      Math.abs(a.start.y - b.start.y) < tolerance && Math.abs(a.end.y - b.end.y) < tolerance &&
+      Math.abs(a.height - b.height) < tolerance;
+  }
+
+  function overlap(a: OcrLine, b: OcrLine) {
+    const left = Math.max(a.start.x, b.start.x), right = Math.min(a.end.x, b.end.x);
+    if (right <= left) return false;
+    const start = yAt(a, left) - yAt(b, left), end = yAt(a, right) - yAt(b, right);
+    return start * end <= 0 || Math.min(Math.abs(start), Math.abs(end)) < Math.max(Math.min(a.height, b.height) * .55, Math.max(a.height, b.height) * .37);
+  }
+
+  async function suggestLines(img: OcrImage, { signal }: { signal?: AbortSignal } = {}): Promise<OcrLine[]> {
+    await nextFrame();
+    signal?.throwIfAborted();
+    const [imageWidth, imageHeight] = sizeOf(img);
+    // Keep enough pixels across each glyph in a tall, densely written page.
+    const maxSpan = imageHeight > imageWidth * 1.5 ? 900 : 620;
+    const { width, height, scale, canvas, normal, opposite } = scanPhoto(img, maxSpan);
+    const tilted = await estimateGeometry(img, canvas, normal, scale, signal);
+    const angles = [0];
+    for (const angle of [...commonAngles(normal, canvas.width, canvas.height), tilted.estimated ? angleOf(tilted) : 0]) {
+      if (Math.abs(angle) < .86 && angles.every(other => Math.abs(other - angle) > .045)) angles.push(angle);
+    }
+    const rows = angles.flatMap(angle => [normal, opposite].flatMap(
+      marks => angledLines(marks, canvas.width, canvas.height, scale, angle),
+    )).sort((a, b) => b.weight - a.weight);
+    const choices: OcrLine[] = [];
+    if (tilted.estimated) choices.push(tilted);
+    if (width > height * 12) choices.push({ start: { x: 0, y: height / 2 }, end: { x: width, y: height / 2 }, height, estimated: true });
+    const matches: LineMatch[] = [];
+    // Spend most probes on glyph-sized rows, with a fixed budget for texture
+    // and illustrations that can produce hundreds of plausible boxes.
+    const seedHeight = Math.min(rows[0]?.h || canvas.height, Math.min(canvas.width, canvas.height) * .13);
+    const budget = clamp(Math.ceil(canvas.height / seedHeight) * 5, 28, 56);
+    for (const { h, geometry: line } of rows) {
+      if (choices.length >= budget) break;
+      if (h >= seedHeight * .25 && !choices.some(other => sameProposal(line, other))) choices.push(line);
+    }
+    for (const line of choices) {
+      if (line.end.x - line.start.x < 2) continue;
+      const match = await lineMatch(img, line, signal, true);
+      if (match && match.glyphHeight >= line.height * .44) matches.push(match);
+    }
+    const chosen: LineMatch[] = [];
+    for (const match of matches.sort((a, b) => b.merit - a.merit)) {
+      const main = chosen[0];
+      if (main) {
+        // A headline, class mark, rule, or photo edge can resemble a glyph by
+        // itself. Prefer rows whose ink is close to the main inscription scale.
+        if (match.glyphHeight < main.glyphHeight * (match.single ? .67 : .48)) continue;
+        if (chosen.some(other => overlap(match.line, other.line))) continue;
+      }
+      chosen.push(match);
+    }
+    return chosen.map(({ line }) => line).sort((a, b) => yAt(a, width / 2) - yAt(b, width / 2));
   }
   async function recognize(img: OcrImage, options: OcrOptions): Promise<OcrResult> {
     if (!options) throw new Error("Invalid line geometry");
@@ -689,5 +891,5 @@
     }
     return {cells,width:w,height:h,count:cells.length,angle,preview:options.probe?'':crop(0,w,1320).toDataURL("image/png")};
   }
-  window.ExileOCR={recognize,suggestLine};
+  window.ExileOCR={recognize,suggestLine,suggestLines};
 })();
