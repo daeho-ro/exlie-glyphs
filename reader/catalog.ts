@@ -115,7 +115,7 @@
     "red--adjective":{ko:["빨간색","빨강","붉은","빨간색의"],ja:["赤の","赤色の"]},
     "blue--adjective":{ko:["파란색","파랑","푸른","파란색의"],ja:["青の","青色の"]},
     "white--adjective":{ko:["하얀","흰색","흰색의"],ja:["白の","白色の"]},
-    "purple--adjective":{ko:["보라색의","보랏빛","보랏빛의"],en:["violet"],ja:["紫色の","むらさきの"]},
+    "purple--adjective":{ko:["보라색","보라색의","보랏빛의"],en:["violet"],ja:["紫色の","むらさきの"]},
     "black--noun":{ko:["검정색","검정","까만색","흑색"],ja:["黒"]},
     "clear--adjective":{ko:["투명","투명색의"],en:["clear"],ja:["無色透明の"]},
     clear:{ko:["투명색","무색투명"],en:["transparent","transparency"],ja:["無色透明"]}, color:{ko:["색깔"],en:["color"],ja:["色彩"]},
@@ -190,7 +190,7 @@
     ["horizontal","adverb","가로로","horizontally","横に"],["vertical","adverb","세로로","vertically","縦に"],
     ["diagonal","adverb","대각선으로","diagonally","斜めに"],
     ["red","adjective","빨간","red","赤い"],["blue","adjective","파란","blue","青い"],
-    ["purple","adjective","보라색","purple","紫の"],["white","adjective","흰","white","白い"],
+    ["purple","adjective","보랏빛","purple","紫の"],["white","adjective","흰","white","白い"],
     ["clear","adjective","투명한","transparent","透明な"],["black","noun","검은색","black","黒色"],
   ] satisfies [string, InflectedClass, string, string, string][]) addInferred(root,pos,tr(ko,en,ja),lexicalInference);
 

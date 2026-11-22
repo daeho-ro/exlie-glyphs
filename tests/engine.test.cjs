@@ -45,6 +45,7 @@ test("only exact example sequences display an authored sentence", () => {
   const reading = reader.read(custom,"ko");
   assert.equal(reading.example,null);
   assert.equal(reading.gloss,"거미 · 보다 · 뱀");
+  assert.equal(reader.read(["purple","purple--adjective","spider"],"ko").gloss,"보라색 · 보랏빛 · 거미");
   assert.equal(reader.read(["purple--adjective","spider"],"en").gloss,"purple · spider");
 });
 
