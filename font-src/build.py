@@ -52,10 +52,18 @@ def composed(glyphs, root, role):
 def main():
     spec = json.loads((HERE / 'specimens.json').read_text())
     glyphs = {name: outline('') for name in ('.notdef', 'space')}
-    for symbol in ET.parse(HERE / 'outlines.svg').findall(SVG + 'symbol'):
-        name = symbol.get('id')
+    symbols = {node.get('id'): node for node in ET.parse(HERE / 'outlines.svg').findall(SVG + 'symbol')}
+    for name, symbol in symbols.items():
         path = symbol.find(SVG + 'path').get('d')
+        base = symbol.find(SVG + 'use')
+        if base is not None:
+            # The three documented ordinals add round endpoints to their numeral.
+            # Equal contour winding and the TrueType overlap flag retain solid joins.
+            base_name = base.get('href').removeprefix('#')
+            path = symbols[base_name].find(SVG + 'path').get('d') + ' ' + path
         glyphs[name] = outline(path)
+        if base is not None:
+            glyphs[name].flags[0] |= 0x40  # OVERLAP_SIMPLE in the OpenType glyf specification.
         if name == 'root-purple':
             glyphs['bare-purple'] = outline(purple_body(path))
 
