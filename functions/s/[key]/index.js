@@ -1,4 +1,4 @@
-import reader from '../../../dist/index.html';
+import reader from '../../../social/reader-shell.html';
 import { sharedBoard, shareHeaders } from '../../../social/share-response.js';
 import { siteName, siteOrigin } from '../../../social/site.js';
 
@@ -29,7 +29,7 @@ export function onRequest(context) {
     const image = url + '/card.png';
     const headers = {
       ...shareHeaders, 'Content-Type': 'text/html; charset=utf-8',
-      'Content-Language': lang, 'Cache-Control': 'public, max-age=300',
+      'Content-Language': lang, 'Cache-Control': 'no-cache',
     };
     if (request.method === 'HEAD') return new Response(null, { headers });
 
@@ -52,6 +52,13 @@ export function onRequest(context) {
       .on('head', { element(el) {
         el.prepend('<base href="/reader/">', { html: true });
         el.append(`<link rel="canonical" href="${siteOrigin}/"><meta name="robots" content="noindex, follow">` + meta, { html: true });
+      } })
+      .on('main#app', { element(el) {
+        // The recipient can see the board even before the reader or its webfont loads.
+        el.setInnerContent(
+          `<img src="/s/${key}/card.png" alt="${text.alt(total)}" width="1200" height="630" style="display:block;width:100%;height:auto" fetchpriority="high">`,
+          { html: true },
+        );
       } })
       .on('a#brand', { element(el) { el.setAttribute('href', '/'); } })
       .on('head > title', { element(el) { el.setInnerContent(title); } })

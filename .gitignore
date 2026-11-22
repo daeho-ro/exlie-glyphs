@@ -4,3 +4,4 @@ out/
 public/reader/
 .openai/
 social/assets/board-art.bin
+social/reader-shell.html

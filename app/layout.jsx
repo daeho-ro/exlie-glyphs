@@ -1,4 +1,4 @@
-import { css, description, tagManager, title } from './reader-template.mjs';
+import { css, description, icon, tagManager, title } from './reader-template.mjs';
 import { siteName, siteOrigin } from '../social/site.js';
 
 const preview = {
@@ -24,7 +24,7 @@ export const metadata = {
     card: 'summary_large_image', title, description,
     images: [{ url: preview.url, alt: preview.alt }],
   },
-  icons: { icon: '/reader/assets/inscription.svg' },
+  icons: { icon },
 };
 const website = {
   '@context': 'https://schema.org',
