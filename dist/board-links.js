@@ -1,14 +1,18 @@
-// Classic script for the file-based reader, also imported by the Pages Functions.
+// Shared by the static reader and the Pages preview functions.
 (() => {
   'use strict';
+  const siteOrigin = 'https://exile-glyphs.net';
   const classes = 'NVADQORLJPXM';
   const languages = ['ko', 'en', 'ja'];
-  const version = 0x30;
-  const pathLimit = 2048;
-  const previewSize = 24;
-  const payloadLength = count => Math.ceil((1 + 2 * count) * 4 / 3);
-  const v2Hash = /^#b=2\.([0-9A-Z]+)\.(ko|en|ja)(?:&s=[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[89abAB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$/;
+  const shortVersion = 0x30, longVersion = 0x40;
+  const shortLimit = 2048;
+  // Leave room for the origin, a percent-encoded credit and the image suffix.
+  const maxKeyLength = 15000;
+  const maxGlyphs = 32768;
+  const repeat = 0xffff;
   const base64url = bytes => btoa(bytes).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const wordBytes = word => String.fromCharCode(word >> 8, word & 255);
+  const readWord = (bytes, i) => (bytes.charCodeAt(i) << 8) | bytes.charCodeAt(i + 1);
 
   function normalizeAuthor(value) {
     if (typeof value !== 'string') return '';
@@ -18,99 +22,116 @@
     return Array.from(name).slice(0, 32).join('').trimEnd();
   }
 
+  function authorPath(author) {
+    const name = normalizeAuthor(author);
+    if (!name) return '';
+    // A trailing encoded space keeps dot-only names from becoming URL navigation.
+    const segment = name === '.' || name === '..' ? name + '+' : encodeURIComponent(name).replace(/%20/g, '+');
+    return '/by/' + segment;
+  }
+
+  function readAuthor(url) {
+    try {
+      const path = new URL(url, siteOrigin).pathname;
+      const match = /^\/s\/[A-Za-z0-9_-]+\/by\/([^/]+)(?:\/card\.png)?$/.exec(path);
+      return match ? normalizeAuthor(decodeURIComponent(match[1].replace(/\+/g, ' '))) : '';
+    } catch {
+      return '';
+    }
+  }
+
+  function tooLong() {
+    return Object.assign(new RangeError('The board exceeds the share-link limit.'), {code: 'board-link-too-long'});
+  }
+
+  // A literal is one two-byte glyph. An unused glyph value starts a three-word
+  // instruction: repeat <distance> <length>, including overlapping repeats.
+  function encode(words, language) {
+    if (words.length <= shortLimit) {
+      return base64url(String.fromCharCode(shortVersion + language) + words.map(wordBytes).join(''));
+    }
+    let bytes = String.fromCharCode(longVersion + language);
+    const seen = new Map();
+    const seed = i => words[i] * 0x100000000 + words[i + 1] * 0x10000 + words[i + 2];
+    for (let i = 0; i < words.length;) {
+      const prior = i + 3 < words.length ? seen.get(seed(i)) : undefined;
+      let count = 0;
+      if (prior !== undefined) {
+        while (i + count < words.length && words[prior + count] === words[i + count]) count++;
+      }
+      if (count >= 4) {
+        bytes += wordBytes(repeat) + wordBytes(i - prior) + wordBytes(count);
+      } else {
+        bytes += wordBytes(words[i]);
+        count = 1;
+      }
+      const end = i + count;
+      for (; i < end; i++) {
+        if (i + 2 < words.length) seen.set(seed(i), i);
+      }
+    }
+    return base64url(bytes);
+  }
+
   function create(entries) {
-    const byId = new Map(entries);
-    const byCode = new Map(Array.from(byId, ([id, code]) => [code, id]));
-
-    // The version and language share one byte. Each word takes two bytes for
-    // its grammatical class, colour bit and permanent base-36 root number.
-    function encode(ids, lang) {
-      if (!Array.isArray(ids) || !ids.length) throw new RangeError('A board needs at least one glyph.');
-      const language = languages.indexOf(lang);
-      if (language < 0) throw new RangeError('Unsupported reading language.');
-      let bytes = String.fromCharCode(version + language);
-      for (const id of ids) {
-        const code = byId.get(id);
-        if (!code) throw new RangeError('Unknown board glyph.');
-        const packed = (classes.indexOf(code[0]) << 12)
-          | (code[1] === 'C' ? 0x0800 : 0) | parseInt(code.slice(2), 36);
-        bytes += String.fromCharCode(packed >> 8, packed & 255);
-      }
-      return base64url(bytes);
-    }
-
-    function decode(payload) {
-      if (payload.length % 4 === 1 || !/^[A-Za-z0-9_-]+$/.test(payload)) return null;
-      const bytes = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
-      if (bytes.length < 3 || bytes.length % 2 !== 1 || base64url(bytes) !== payload) return null;
-      const lang = languages[bytes.charCodeAt(0) - version];
-      if (!lang) return null;
-      const ids = [];
-      for (let i = 1; i < bytes.length; i += 2) {
-        const packed = (bytes.charCodeAt(i) << 8) | bytes.charCodeAt(i + 1);
-        const prefix = classes[packed >> 12], root = packed & 0x07ff;
-        if (!prefix || root >= 36 * 36) return null;
-        const code = prefix + (packed & 0x0800 ? 'C' : 'B') + root.toString(36).toUpperCase().padStart(2, '0');
-        const id = byCode.get(code);
-        if (!id) return null;
-        ids.push(id);
-      }
-      return {ids, lang};
-    }
-
-    function readHash(hash) {
-      if (typeof hash !== 'string' || !hash.startsWith('#b=')) return null;
-      const old = v2Hash.exec(hash);
-      if (!old) return decode(hash.slice(3));
-      const [, packed, lang] = old;
-      if (packed.length % 4 !== 0) return null;
-      const ids = [];
-      for (let i = 0; i < packed.length; i += 4) {
-        const id = byCode.get(packed.slice(i, i + 4));
-        if (!id) return null;
-        ids.push(id);
-      }
-      return {ids, lang};
+    const byId = new Map(), byWord = new Map();
+    for (const [id, code] of entries) {
+      const word = (classes.indexOf(code[0]) << 12) | (code[1] === 'C' ? 0x0800 : 0) | parseInt(code.slice(2), 36);
+      byId.set(id, word);
+      byWord.set(word, id);
     }
 
     function sharePath(ids, lang = 'ko') {
-      const payload = encode(ids, lang);
-      if (ids.length <= pathLimit) return '/s/' + payload;
-      const prefix = encode(ids.slice(0, previewSize), lang);
-      return '/s/' + prefix + '.' + ids.length + '#b=' + payload;
+      if (!Array.isArray(ids) || !ids.length) throw new RangeError('A board needs at least one glyph.');
+      if (ids.length > maxGlyphs) throw tooLong();
+      const language = languages.indexOf(lang);
+      if (language < 0) throw new RangeError('Unsupported reading language.');
+      const words = ids.map(id => {
+        const word = byId.get(id);
+        if (word === undefined) throw new RangeError('Unknown board glyph.');
+        return word;
+      });
+      const key = encode(words, language);
+      if (key.length > maxKeyLength) throw tooLong();
+      return '/s/' + key;
     }
 
     function parseShareKey(key) {
-      if (typeof key !== 'string' || !key.length || key.length > payloadLength(pathLimit)) return null;
-      const dot = key.indexOf('.');
-      if (dot < 0) {
-        const board = decode(key);
-        return board ? {...board, total: board.ids.length} : null;
+      if (typeof key !== 'string' || key.length < 4 || key.length > maxKeyLength ||
+          key.length % 4 === 1 || !/^[A-Za-z0-9_-]+$/.test(key)) return null;
+      const bytes = atob(key.replace(/-/g, '+').replace(/_/g, '/'));
+      const header = bytes.charCodeAt(0);
+      const long = header >= longVersion;
+      const language = header - (long ? longVersion : shortVersion);
+      if (!languages[language] || bytes.length % 2 !== 1) return null;
+      if (!long && (bytes.length - 1) / 2 > shortLimit) return null;
+      const words = [];
+      for (let i = 1; i < bytes.length; i += 2) {
+        const word = readWord(bytes, i);
+        if (long && word === repeat) {
+          if (i + 5 >= bytes.length) return null;
+          const distance = readWord(bytes, i + 2), count = readWord(bytes, i + 4);
+          if (!distance || distance > words.length || count < 4 || words.length + count > maxGlyphs) return null;
+          for (let j = 0; j < count; j++) words.push(words[words.length - distance]);
+          i += 4;
+        } else {
+          if (!byWord.has(word) || words.length >= maxGlyphs) return null;
+          words.push(word);
+        }
       }
-      // Bounds are checked before decoding any request-controlled data.
-      if (dot !== payloadLength(previewSize)) return null;
-      const suffix = key.slice(dot + 1);
-      if (!/^[1-9][0-9]{0,15}$/.test(suffix)) return null;
-      const total = Number(suffix);
-      if (!Number.isSafeInteger(total) || total <= pathLimit || String(total) !== suffix) return null;
-      const board = decode(key.slice(0, dot));
-      return board && board.ids.length === previewSize ? {...board, total} : null;
+      // Accept only one spelling, including base64 tail bits and repeat instructions.
+      if (encode(words, language) !== key) return null;
+      return {ids: words.map(word => byWord.get(word)), lang: languages[language], total: words.length};
     }
 
-    function readBoardAt(key, hash) {
-      if (key == null) return readHash(hash);
-      const preview = parseShareKey(key);
-      if (!preview) return null;
-      if (hash === '' || hash === '#' || hash == null) {
-        return preview.ids.length === preview.total ? {ids: preview.ids, lang: preview.lang} : null;
-      }
-      const board = readHash(hash);
-      if (!board || board.lang !== preview.lang || board.ids.length !== preview.total) return null;
-      return preview.ids.every((id, i) => id === board.ids[i]) ? board : null;
+    function readBoardAt(key, hash = '') {
+      if (hash) return null;
+      const board = parseShareKey(key);
+      return board ? {ids: board.ids, lang: board.lang} : null;
     }
 
-    return {boardHash: (ids, lang = 'ko') => '#b=' + encode(ids, lang), readHash, sharePath, parseShareKey, readBoardAt};
+    return {sharePath, parseShareKey, readBoardAt};
   }
 
-  globalThis.ExileBoardLinks = Object.freeze({create, normalizeAuthor});
+  globalThis.ExileBoardLinks = Object.freeze({siteOrigin, create, normalizeAuthor, authorPath, readAuthor});
 })();

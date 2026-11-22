@@ -22,6 +22,20 @@ async function run() {
   function equal(actual, expected, detail) {
     if (actual !== expected) throw Error(detail + ': ' + String(actual).slice(0, 160) + ' ≠ ' + String(expected).slice(0, 160));
   }
+  // Exercise shared paths locally without navigating the fixture to the production origin.
+  function localHref(path) {
+    const url = new URL(path, location.origin);
+    return location.origin + url.pathname + url.search + url.hash;
+  }
+  function checkPublicShare(url, ids, lang, author = '') {
+    equal(url.origin, 'https://exile-glyphs.net', 'Public share origin');
+    const key = url.pathname.split('/')[2];
+    const suffix = author ? '/by/' + encodeURIComponent(author).replace(/%20/g, '+') : '';
+    equal(/^[A-Za-z0-9_-]+$/.test(key), true, 'Crawler-readable preview key');
+    equal(url.pathname, '/s/' + key + suffix, 'Board and optional author path');
+    equal(url.hash, '', 'All glyphs fit in the path without a fragment');
+    equal(url.search, '', 'Public copies use a path with no query');
+  }
   async function boot({path = '/', languages, language, saved, hosted = true}) {
     frame?.remove();
     frame = document.createElement('iframe');
@@ -38,7 +52,7 @@ async function run() {
     Object.defineProperties(w.navigator, {
       language:{value:language}, languages:{value:languages},
     });
-    w.history.replaceState(null, '', path);
+    w.history.replaceState(null, '', localHref(path));
     d.body.innerHTML = shell.body.innerHTML;
     const base = d.createElement('base');
     base.href = entry.href;
@@ -80,14 +94,13 @@ async function run() {
   const short = ['zero', 'bird', 'bird', 'zero'];
   const long = Array.from({length:2049}, (_, i) => short[i % short.length]);
   const originals = [
-    {path:codec.createBoardLink(short, 'ko') + '?via=test', ids:short, hosted:true},
+    {path:codec.createBoardLink(short, 'ko'), ids:short, hosted:true},
     {path:codec.createBoardLink(long, 'ko'), ids:long, hosted:true},
-    {path:'/standalone/index.html?via=test' + codec.boardHash(short, 'ko'), ids:short, hosted:false},
-    {path:'/#b=2.QB00NBBDNBBDQB00.ko&s=00000000-0000-4000-8000-000000000001', ids:short, hosted:true},
+    {path:codec.createBoardLink(short, 'ko'), ids:short, hosted:false},
   ];
   for (const {path, ids, hosted} of originals) {
     const {w,d,storage} = await boot({path, hosted, languages:['fr','ja-JP']});
-    const original = new URL(path, location.origin).href;
+    const original = localHref(path);
     const click = selector => d.querySelector(selector).click();
     const switchTo = lang => {
       const select = d.querySelector('#locale');
@@ -131,12 +144,11 @@ async function run() {
     w.ExileShare.download = () => {};
     click('[data-act=export]');
     click('[data-act=share]');
-    const key = sent.pathname.match(/^\/s\/(.+)$/)?.[1];
+    const key = sent.pathname.split('/')[2];
     const decoded = w.ExileShare.readBoardAt(key, sent.hash);
     equal(decoded.lang, 'en', 'Newly shared language');
     equal(decoded.ids.join(','), ids.join(','), 'Newly shared signs and ordering');
-    equal(Boolean(key), hosted, 'Hosted path or portable standalone fragment');
-    if (!hosted) equal(sent.pathname + sent.search, '/standalone/index.html?via=test', 'Standalone URL');
+    checkPublicShare(sent, ids, 'en');
     click('[data-act=export]');
     click('[data-act=save-card]');
     equal(card.lang, 'en', 'PNG language');
@@ -144,18 +156,18 @@ async function run() {
     equal(w.location.href, original, 'Export leaves incoming link intact');
   }
   // Editing a credit produces a new link while the received board remains intact.
-  for (const [ids, hosted] of [[short,true], [long,true], [short,false]]) {
+  for (const [ids, hosted] of [[short,true], [long,true], [short,false], [long,false]]) {
     const credited = new URL(codec.createBoardLink(ids, 'ko', '이 & 민'));
-    if (!hosted) {
-      credited.pathname = '/standalone/index.html';
-      credited.hash = codec.boardHash(ids, 'ko');
-      credited.searchParams.set('via', 'test');
-    }
     const {w,d} = await boot({path:credited.href, hosted, languages:['en']});
     const author = d.getElementById('board-author');
     equal(author.value, '이 & 민', 'Credit from the link');
     let sent, card;
-    Object.defineProperty(w.navigator, 'share', {value: async ({url}) => {sent = new URL(url);}});
+    if (hosted) {
+      Object.defineProperty(w.navigator, 'share', {value: async ({url}) => {sent = new URL(url);}});
+    } else {
+      Object.defineProperty(w.navigator, 'share', {value:undefined});
+      Object.defineProperty(w.navigator, 'clipboard', {value:{writeText:async url => {sent = new URL(url);}}});
+    }
     w.ExileShare.png = async (words, lang, reading, by) => {card = {reading, by}; return new Blob();};
     w.ExileShare.download = () => {};
     const click = selector => d.querySelector(selector).click();
@@ -166,13 +178,13 @@ async function run() {
       equal(author.value, text, 'Input preserves spaces during composition');
       author.dispatchEvent(new w.Event('change', {bubbles:true}));
     };
-    changeCredit('  가   나 &<>#  ');
-    equal(author.value, '가 나 &<>#', 'Credit normalized on commit');
-    equal(w.location.href, credited.href, 'Credit edit preserves received address');
+    changeCredit('  가   나 + &<>#  ');
+    equal(author.value, '가 나 + &<>#', 'Credit normalized on commit');
+    equal(w.location.href, localHref(credited), 'Credit edit preserves received address');
     send();
-    const key = sent.pathname.match(/^\/s\/(.+)$/)?.[1];
+    const key = sent.pathname.split('/')[2];
     equal(w.ExileShare.readBoardAt(key, sent.hash).ids.join(','), ids.join(','), 'All credited glyphs');
-    equal(sent.searchParams.get('by'), author.value, 'New credit in the exported query');
+    checkPublicShare(sent, ids, 'en', author.value);
     for (const reading of [false, true]) {
       if (reading) click('[data-act=reveal]');
       click('[data-act=export]'); click('[data-act=save-card]');
@@ -182,9 +194,8 @@ async function run() {
     changeCredit('🐈'.repeat(34));
     equal(author.value, '🐈'.repeat(32), 'Limit counts code points, not UTF-16 units');
     changeCredit('   '); send();
-    equal(sent.searchParams.has('by'), false, 'Intentionally anonymous copy');
-    equal(w.location.href, credited.href, 'Original after clearing draft credit');
-    if (!hosted) equal(sent.searchParams.get('via'), 'test', 'Other standalone query retained');
+    equal(w.location.href, localHref(credited), 'Original after clearing draft credit');
+    checkPublicShare(sent, ids, 'en');
   }
   {
     const {w,d} = await boot({path:codec.createBoardLink(short, 'ko', '친구'), hosted:true, languages:['ko']});
@@ -214,17 +225,19 @@ async function run() {
     click('[data-act=restore]');
     equal(author(), '친구', 'Undoing photo replacement restores its credit');
   }
-  // Same fragment under a different preview key must revalidate the path.
-  const original = new URL(codec.createBoardLink(short, 'ko'));
-  original.hash = codec.boardHash(short, 'ko');
-  const different = new URL(codec.createBoardLink(['snake'], 'ko'));
-  different.hash = original.hash;
-  const {w, d} = await boot({path:original.href, saved:'ja', languages:['en-GB']});
-  equal(d.documentElement.lang, 'ja', 'Persisted recipient preference on a shared page');
-  equal(d.querySelectorAll('.board-slot').length, short.length, 'Valid key with matching fragment');
-  w.history.pushState(null, '', different.href);
-  w.dispatchEvent(new w.PopStateEvent('popstate'));
-  equal(d.querySelectorAll('.board-slot').length, 0, 'Different key with same fragment rejected');
+  // A retired address must never partially restore the board.
+  const oldKey = 'MEABJFEDoBJxZOaEJWTmc0oh5gOg';
+  for (const path of [
+    '/#b=' + oldKey, '/standalone/index.html?by=Old#b=' + oldKey,
+    '/#b=2.QB00NBBDNBBDQB00.ko&s=00000000-0000-4000-8000-000000000001',
+    '/s/' + oldKey + '.2049#b=' + oldKey,
+    '/s/' + oldKey + '?by=Old', '/s/' + oldKey + '#b=' + oldKey,
+  ]) {
+    const {d} = await boot({path, languages:['ko']});
+    equal(d.querySelectorAll('.board-slot').length, 0, 'Retired address stays empty');
+    equal(d.querySelector('#board-author').value, '', 'Retired credit stays empty');
+    equal(d.querySelector('.plate-empty').textContent.includes('만료'), true, 'Expired link guidance');
+  }
   frame.remove();
 }
 </script>

@@ -22,21 +22,12 @@
       window.ExileReading.tokens.map(({id}) => [id, window.ExileCodes.byId[id]])
     );
   }
-  const boardHash = (ids, lang = "ko") => links().boardHash(ids, lang);
-  const parseShareKey = (key) => links().parseShareKey(key);
+  const parseShareKey = key => links().parseShareKey(key);
   const readBoardAt = (key, hash = location.hash) => links().readBoardAt(key, hash);
 
-  function createBoardLink(ids, lang = "ko", author = "", { portable = false } = {}) {
-    if (!["http:", "https:"].includes(location.protocol)) throw new Error("A hosted board is needed to create a link.");
-    const url = portable ? new URL(boardHash(ids, lang), location.href) : new URL(links().sharePath(ids, lang), location.origin);
-    const name = globalThis.ExileBoardLinks.normalizeAuthor(author);
-    if (name) url.searchParams.set("by", name);
-    else if (url.searchParams.has("by")) url.searchParams.delete("by");
-    return url.href;
-  }
-
-  function readBoardLink(hash = location.hash) {
-    return links().readHash(hash);
+  function createBoardLink(ids, lang = "ko", author = "") {
+    const { siteOrigin, authorPath } = globalThis.ExileBoardLinks;
+    return new URL(links().sharePath(ids, lang) + authorPath(author), siteOrigin).href;
   }
 
   async function prepareFont(words) {
@@ -254,5 +245,5 @@
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
 
-  window.ExileShare = {boardHash, createBoardLink, readBoardLink, parseShareKey, readBoardAt, png, download};
+  window.ExileShare = {createBoardLink, parseShareKey, readBoardAt, png, download};
 })();

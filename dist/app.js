@@ -105,7 +105,16 @@
     ],
     puzzleLink: ['문자판 링크', 'Board link', '文字盤のリンク'],
     saveFailed: ['이미지를 저장할 수 없습니다. 다시 시도해 주세요.', 'Could not save the image. Please try again.', '画像を保存できませんでした。もう一度お試しください。'],
-    shareFileHint: ['링크를 공유하려면 생성기를 웹 주소로 열어 주세요.', 'Open the generator at a web address to share a link.', 'リンクを共有するには、ウェブアドレスから開いてください。'],
+    expired: [
+      '만료된 공유 링크입니다. 아래에서 새 문자판을 만들 수 있습니다.',
+      'This shared link has expired. You can start a new board below.',
+      'この共有リンクは無効になりました。下から新しい文字盤を作れます。',
+    ],
+    longLink: [
+      '문자판이 너무 길어 링크를 만들 수 없습니다. 나누어 공유해 주세요.',
+      'This board is too long for one link. Share it in smaller parts.',
+      '一つのリンクに収まりません。文字盤を分けて共有してください。',
+    ],
     shareFailed: [
       '공유할 수 없습니다. 다시 시도해 주세요.',
       'Sharing failed. Please try again.',
@@ -178,7 +187,7 @@
     history: [],
     query: '',
     allSigns: false,
-    shared: false,
+    linkNotice: '',
     revealed: true,
   };
   const tr = (key) =>
@@ -229,7 +238,7 @@
     ].filter(Boolean).join('');
     const example = ids.length ? reader.read(ids, state.loc).example : null;
     return `<section class="plate" id="board" data-revealed="${state.revealed}">
-      <div id="board-reading"><div id="board-signs" class="inscription" data-long="${ids.length > 5}">${signs || `<span class="plate-empty">${txt('empty')}</span>`}</div></div>
+      <div id="board-reading"><div id="board-signs" class="inscription" data-long="${ids.length > 5}">${signs || `<span class="plate-empty">${txt(state.linkNotice || 'empty')}</span>`}</div></div>
       ${ids.length ? `<button type="button" class="board-reveal" data-act="reveal" aria-controls="board-reading${example ? ' board-example' : ''}" aria-expanded="${state.revealed}">${txt(state.revealed ? 'hide' : 'show')}</button>` : ''}
       ${example ? `<p class="board-example" id="board-example" lang="${state.loc}">${esc(example.texts[state.loc])}</p>` : ''}
       <label class="board-byline"><span aria-hidden="true">by</span>
@@ -324,13 +333,7 @@
   }
   async function shareBoard() {
     try {
-      if (location.protocol === 'file:') {
-        toast(tr('shareFileHint'));
-        return;
-      }
-      // A standalone static reader can reopen its own fragment without a Pages Function.
-      const portable = !document.querySelector('meta[property="og:image"]');
-      const url = share.createBoardLink(state.ids, state.loc, state.author, { portable });
+      const url = share.createBoardLink(state.ids, state.loc, state.author);
       if (navigator.share) {
         try {
           await navigator.share({ title: 'Exile Glyphs', url });
@@ -347,25 +350,24 @@
       } catch {
         modal('share', `<p>${txt('linkManual')}</p><a class="btn" href="${esc(url)}">${txt('puzzleLink')}</a>`);
       }
-    } catch {
-      toast(tr('shareFailed'));
+    } catch (error) {
+      toast(tr(error?.code === 'board-link-too-long' ? 'longLink' : 'shareFailed'));
     }
   }
   let activeLocation;
   let receivedLocation;
   const currentLocation = () => location.pathname + location.search + location.hash;
   function shareRoute() {
-    return /^\/s\/([^/]+)\/?$/.exec(location.pathname)?.[1];
+    return /^\/s\/([^/]+)(?:\/by\/[^/]+)?\/?$/.exec(location.pathname)?.[1];
+  }
+  function draftPath() {
+    return location.pathname.startsWith('/s/') ? '/' : location.pathname;
   }
   function openPage(page) {
     if (state.page === page) return;
-    const base = shareRoute() ? '/' : location.pathname + location.search;
-    const target = page === 'dict' ? base + '#dict' : receivedLocation || base;
-    if (location.protocol === 'file:') {
-      location.hash = new URL(target, location.href).hash;
-    } else {
-      history.pushState(history.state, '', target);
-    }
+    const target = page === 'dict' ? draftPath() + '#dict' : receivedLocation || draftPath();
+    if (location.protocol === 'file:') location.hash = new URL(target, location.href).hash;
+    else history.pushState(history.state, '', target);
     activeLocation = currentLocation();
     state.page = page;
     render();
@@ -373,26 +375,28 @@
   }
   function loadLocation() {
     const route = currentLocation();
-    if (activeLocation === route) return;
-    activeLocation = route;
     const key = shareRoute();
+    const url = new URL(location.href);
+    const retired = url.hash.startsWith('#b=') || Boolean(key && url.search) || url.searchParams.has('by');
+    const page = !retired && !key && url.hash === '#dict' ? 'dict' : 'desk';
+    if (activeLocation === route && state.page === page) return;
+    activeLocation = route;
     const fromDictionary = state.page === 'dict';
-    state.page = !key && location.hash === '#dict' ? 'dict' : 'desk';
-    if (key || location.hash.startsWith('#b=')) {
-      // A dictionary round trip keeps the original link, revealed reading and selected sign.
-      if (!(fromDictionary && route === receivedLocation)) {
-        const board = share.readBoardAt(key, location.hash);
+    state.page = page;
+    if (key || retired) {
+      // A dictionary round trip keeps the board's reading, edits and selection.
+      if (!(fromDictionary && route === receivedLocation && !retired)) {
+        const board = retired ? null : share.readBoardAt(key, '');
         state.ids = board?.ids || [];
-        state.author = board ? globalThis.ExileBoardLinks.normalizeAuthor(new URLSearchParams(location.search).get('by')) : '';
+        state.author = board ? globalThis.ExileBoardLinks.readAuthor(url) : '';
         state.selected = null;
         state.history = [];
-        state.shared = Boolean(board);
         state.revealed = !board;
+        state.linkNotice = board ? '' : (retired || key?.includes('.') ? 'expired' : 'invalid');
         receivedLocation = board ? route : undefined;
-        if (!board) toast(tr('invalid'));
       }
-    } else if (state.page === 'desk') {
-      state.shared = false;
+    } else if (page === 'desk') {
+      state.linkNotice = '';
       receivedLocation = undefined;
     }
     render();
@@ -409,18 +413,15 @@
     });
     if (resetAuthor) state.author = '';
     if (state.history.length > 30) state.history.shift();
-    if (shareRoute() || state.shared || location.hash.startsWith('#b=')) {
-      if (shareRoute()) history.replaceState(history.state, '', '/');
-      else {
-        const draft = new URL(location.href);
-        draft.hash = '';
-        draft.searchParams.delete('by');
-        if (draft.protocol === 'file:') location.hash = '';
-        else history.replaceState(history.state, '', draft.href);
+    if (shareRoute() || state.linkNotice) {
+      if (location.protocol === 'file:') {
+        if (location.hash) location.hash = '';
+      } else {
+        history.replaceState(history.state, '', draftPath());
       }
       activeLocation = currentLocation();
     }
-    state.shared = false;
+    state.linkNotice = '';
     receivedLocation = undefined;
     state.ids = ids.slice();
     state.selected = selected;
