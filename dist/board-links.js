@@ -10,6 +10,14 @@
   const v2Hash = /^#b=2\.([0-9A-Z]+)\.(ko|en|ja)(?:&s=[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[89abAB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$/;
   const base64url = bytes => btoa(bytes).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
+  function normalizeAuthor(value) {
+    if (typeof value !== 'string') return '';
+    const name = value.normalize('NFC')
+      .replace(/[\u0000-\u0008\u000e-\u001f\u007f-\u009f\u061c\u200b\u200e\u200f\u202a-\u202e\u2066-\u2069\ud800-\udfff]/gu, '')
+      .replace(/\s+/gu, ' ').trim();
+    return Array.from(name).slice(0, 32).join('').trimEnd();
+  }
+
   function create(entries) {
     const byId = new Map(entries);
     const byCode = new Map(Array.from(byId, ([id, code]) => [code, id]));
@@ -104,5 +112,5 @@
     return {boardHash: (ids, lang = 'ko') => '#b=' + encode(ids, lang), readHash, sharePath, parseShareKey, readBoardAt};
   }
 
-  globalThis.ExileBoardLinks = Object.freeze({create});
+  globalThis.ExileBoardLinks = Object.freeze({create, normalizeAuthor});
 })();

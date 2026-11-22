@@ -18,6 +18,8 @@
         })[ch],
     );
   const messages = {
+    author: ['작성자', 'Author', '作成者'],
+    optionalName: ['작성자 (선택)', 'Author (optional)', '作成者（任意）'],
     desk: ['만들기', 'Create', '作る'],
     dict: ['사전', 'Lexicon', '辞典'],
     title: ['유배지 문자열 생성기', 'Exile glyph generator', '流刑地の文字列メーカー'],
@@ -171,6 +173,7 @@
     loc: preferredLocale(),
     page: 'desk',
     ids: [],
+    author: '',
     selected: null,
     history: [],
     query: '',
@@ -229,6 +232,9 @@
       <div id="board-reading"><div id="board-signs" class="inscription" data-long="${ids.length > 5}">${signs || `<span class="plate-empty">${txt('empty')}</span>`}</div></div>
       ${ids.length ? `<button type="button" class="board-reveal" data-act="reveal" aria-controls="board-reading${example ? ' board-example' : ''}" aria-expanded="${state.revealed}">${txt(state.revealed ? 'hide' : 'show')}</button>` : ''}
       ${example ? `<p class="board-example" id="board-example" lang="${state.loc}">${esc(example.texts[state.loc])}</p>` : ''}
+      <label class="board-byline"><span aria-hidden="true">by</span>
+        <input type="text" id="board-author" dir="auto" aria-label="${txt('author')}" autocomplete="off" enterkeyhint="done" placeholder="${txt('optionalName')}" value="${esc(state.author)}">
+      </label>
       ${ids.length || editTools ? `<div class="plate-bottom">
         ${ids.length ? `<button type="button" class="board-export" data-act="export" aria-haspopup="dialog" aria-controls="dialog">${ico('share')}${txt('export')}</button>` : ''}
         <div class="plate-tools">${editTools}</div></div>` : ''}</section>`;
@@ -273,7 +279,8 @@
       .join('');
     return `<div class="intro temple-hero"><div class="hero-text"><h1>${txt('title')}</h1></div><div class="wall-inscription" aria-hidden="true">${wall}</div></div>
       <div class="work-grid"><article class="editor"><div class="desk-actions">${exampleMenu()}<button class="mobile-palette-btn" data-act="read-photo">${ico('picture')}${txt('photo')}</button></div>
-      ${plate(state.ids)}<section class="inline-picker"><div class="output-head"><h2>${txt('palette')}</h2></div><label class="search palette-search">${ico('search')}<input id="pal-query" class="field" type="search" autocomplete="off" placeholder="${txt('search')}" aria-label="${txt('search')}" value="${esc(state.query)}"></label><div id="key-choices">${keyChoices()}</div></section>
+      ${plate(state.ids)}
+      <section class="inline-picker"><div class="output-head"><h2>${txt('palette')}</h2></div><label class="search palette-search">${ico('search')}<input id="pal-query" class="field" type="search" autocomplete="off" placeholder="${txt('search')}" aria-label="${txt('search')}" value="${esc(state.query)}"></label><div id="key-choices">${keyChoices()}</div></section>
       </article></div>`;
   }
   function render() {
@@ -306,7 +313,7 @@
   async function saveCard(button) {
     button.disabled = true;
     try {
-      const blob = await share.png(state.ids.slice(), state.loc, state.revealed);
+      const blob = await share.png(state.ids.slice(), state.loc, state.revealed, state.author);
       share.download(blob);
       window.dataLayer?.push({ event: 'glyph_card_save' });
     } catch (error) {
@@ -322,9 +329,8 @@
         return;
       }
       // A standalone static reader can reopen its own fragment without a Pages Function.
-      const url = document.querySelector('meta[property="og:image"]')
-        ? share.createBoardLink(state.ids, state.loc)
-        : new URL(share.boardHash(state.ids, state.loc), location.href).href;
+      const portable = !document.querySelector('meta[property="og:image"]');
+      const url = share.createBoardLink(state.ids, state.loc, state.author, { portable });
       if (navigator.share) {
         try {
           await navigator.share({ title: 'Exile Glyphs', url });
@@ -377,6 +383,7 @@
       if (!(fromDictionary && route === receivedLocation)) {
         const board = share.readBoardAt(key, location.hash);
         state.ids = board?.ids || [];
+        state.author = board ? globalThis.ExileBoardLinks.normalizeAuthor(new URLSearchParams(location.search).get('by')) : '';
         state.selected = null;
         state.history = [];
         state.shared = Boolean(board);
@@ -393,13 +400,24 @@
   function refreshBoard() {
     $('board').outerHTML = plate(state.ids);
   }
-  function updateIds(ids, selected = null, singleAppend = false) {
+  function updateIds(ids, { selected = null, singleAppend = false, replace = false } = {}) {
     if (!Array.isArray(ids) || ids.some((id) => !reader.byId.has(id))) return;
-    state.history.push({ ids: state.ids.slice(), selected: state.selected, singleAppend });
+    const resetAuthor = replace || !ids.length;
+    state.history.push({
+      ids: state.ids.slice(), selected: state.selected, singleAppend,
+      author: resetAuthor ? state.author : undefined,
+    });
+    if (resetAuthor) state.author = '';
     if (state.history.length > 30) state.history.shift();
     if (shareRoute() || state.shared || location.hash.startsWith('#b=')) {
       if (shareRoute()) history.replaceState(history.state, '', '/');
-      else location.replace('#');
+      else {
+        const draft = new URL(location.href);
+        draft.hash = '';
+        draft.searchParams.delete('by');
+        if (draft.protocol === 'file:') location.hash = '';
+        else history.replaceState(history.state, '', draft.href);
+      }
       activeLocation = currentLocation();
     }
     state.shared = false;
@@ -408,12 +426,18 @@
     state.selected = selected;
     refreshBoard();
   }
+  function replaceBoard(ids) {
+    if (ids.length === state.ids.length && ids.every((id, i) => id === state.ids[i])) return;
+    updateIds(ids, { replace: true });
+  }
   function insert(ids) {
     const at = state.selected === null ? state.ids.length : state.selected + 1;
     updateIds(
       [...state.ids.slice(0, at), ...ids, ...state.ids.slice(at)],
-      state.selected === null ? null : at + ids.length - 1,
-      state.selected === null && ids.length === 1,
+      {
+        selected: state.selected === null ? null : at + ids.length - 1,
+        singleAppend: state.selected === null && ids.length === 1,
+      },
     );
   }
   document.addEventListener('click', (e) => {
@@ -468,7 +492,7 @@
         shareBoard();
         break;
       case 'read-photo':
-        window.ExilePhotoReader.open(state.loc, (ids) => updateIds(ids));
+        window.ExilePhotoReader.open(state.loc, replaceBoard);
         break;
       case 'tail':
         state.selected = null;
@@ -487,6 +511,7 @@
         const prior = state.history.pop();
         if (prior) {
           state.ids = prior.ids;
+          if (prior.author !== undefined) state.author = prior.author;
           state.selected = prior.selected;
           refreshBoard();
         }
@@ -508,6 +533,11 @@
   });
   document.addEventListener('change', (e) => {
     const el = e.target;
+    if (el.id === 'board-author') {
+      // Leave the in-progress IME composition, caret and spaces alone while typing.
+      state.author = globalThis.ExileBoardLinks.normalizeAuthor(el.value);
+      el.value = state.author;
+    }
     if (el.id === 'locale') {
       if (!reader.languages.includes(el.value)) return;
       state.loc = el.value;
@@ -515,11 +545,17 @@
       render();
     }
     if (el.id === 'example' && el.value !== '') {
-      updateIds(reader.examples[Number(el.value)].ids);
+      replaceBoard(reader.examples[Number(el.value)].ids);
       el.value = '';
     }
   });
+  document.addEventListener('keydown', (e) => {
+    if (e.target.id === 'board-author' && e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) {
+      e.target.blur();
+    }
+  });
   document.addEventListener('input', (e) => {
+    if (e.target.id === 'board-author') state.author = e.target.value;
     if (e.target.id === 'pal-query') {
       state.query = e.target.value;
       state.allSigns = false;
@@ -534,7 +570,7 @@
     const blob = window.ExileClipboard.eventImage(event);
     if (!blob) return;
     event.preventDefault();
-    window.ExilePhotoReader.open(state.loc, (ids) => updateIds(ids), blob);
+    window.ExilePhotoReader.open(state.loc, replaceBoard, blob);
   });
   $('help').onclick = () =>
     modal(

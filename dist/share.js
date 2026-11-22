@@ -26,9 +26,13 @@
   const parseShareKey = (key) => links().parseShareKey(key);
   const readBoardAt = (key, hash = location.hash) => links().readBoardAt(key, hash);
 
-  function createBoardLink(ids, lang = "ko") {
+  function createBoardLink(ids, lang = "ko", author = "", { portable = false } = {}) {
     if (!["http:", "https:"].includes(location.protocol)) throw new Error("A hosted board is needed to create a link.");
-    return new URL(links().sharePath(ids, lang), location.origin).href;
+    const url = portable ? new URL(boardHash(ids, lang), location.href) : new URL(links().sharePath(ids, lang), location.origin);
+    const name = globalThis.ExileBoardLinks.normalizeAuthor(author);
+    if (name) url.searchParams.set("by", name);
+    else if (url.searchParams.has("by")) url.searchParams.delete("by");
+    return url.href;
   }
 
   function readBoardLink(hash = location.hash) {
@@ -109,7 +113,7 @@
     for (let y = 0; y < height; y += step) ctx.fillRect(0, y, width, scale);
   }
 
-  function cardLayout(ctx, words, locale, showReading, sentence) {
+  function cardLayout(ctx, words, locale, showReading, sentence, byline) {
     const columns = Math.min(words.length, words.length <= 48 ? 6 : Math.ceil(Math.sqrt(words.length * 1.4)));
     const width = Math.max(1200, Math.min(3072, columns * 75 + 144));
     const margin = 72, top = 136;
@@ -119,7 +123,7 @@
     const sentenceSize = 32, sentenceStep = 44;
     ctx.font = '500 ' + sentenceSize + 'px ' + labelFace;
     const sentenceLines = sentence ? textLines(ctx, sentence, width - 2 * margin) : [];
-    const bottom = 48 + (sentenceLines.length ? 20 + sentenceLines.length * sentenceStep : 0);
+    const bottom = 48 + (byline ? 40 : 0) + (sentenceLines.length ? 20 + sentenceLines.length * sentenceStep : 0);
     const available = maxHeight - top - bottom;
     const widest = Math.min(220, pitch * .87);
     let maxLabelSize = 34;
@@ -166,22 +170,24 @@
     throw error;
   }
 
-  async function png(ids, lang = document.documentElement.lang, showReading = false) {
+  async function png(ids, lang = document.documentElement.lang, showReading = false, author = "") {
     const words = getWords(ids);
     const reader = window.ExileReading;
     const locale = reader.languages.includes(lang) ? lang : "en";
+    const name = author ? globalThis.ExileBoardLinks.normalizeAuthor(author) : "";
+    const byline = name ? "by " + name : "";
     const sentence = showReading ? reader.read(ids, locale).example?.texts[locale] : "";
     const count = {ko:"문자 " + words.length + "개", en:words.length + (words.length === 1 ? " glyph" : " glyphs"), ja:words.length + " 文字"}[locale];
     const labels = showReading ? [...new Set(words.map(word => word.labels[locale]))].join(" ") : "";
     const [brand] = await Promise.all([
       brandImage(),
       prepareFont(words),
-      document.fonts.load('500 32px "Pretendard"', [count, labels, sentence || ""].join(" ")),
+      document.fonts.load('500 32px "Pretendard"', [count, labels, sentence || "", byline].join(" ")),
     ]);
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Image export is unavailable.");
-    const card = cardLayout(ctx, words, locale, showReading, sentence);
+    const card = cardLayout(ctx, words, locale, showReading, sentence, byline);
     canvas.width = card.width;
     canvas.height = card.height;
     stoneBackground(ctx, card.width, card.height);
@@ -224,6 +230,13 @@
     ctx.font = "500 " + card.sentenceSize + "px " + labelFace;
     ctx.textBaseline = "top";
     card.sentenceLines.forEach((line, n) => ctx.fillText(line, card.width / 2, card.sentenceTop + n * card.sentenceStep));
+    if (byline) {
+      ctx.textAlign = "right";
+      ctx.textBaseline = "alphabetic";
+      ctx.fillStyle = "#cfccb9";
+      ctx.font = "500 24px " + labelFace;
+      ctx.fillText(byline, card.width - card.margin, card.height - 34, card.width - 2 * card.margin);
+    }
     return new Promise((resolve, reject) => canvas.toBlob(blob => {
       if (blob) resolve(blob);
       else reject(new Error("Image export failed."));

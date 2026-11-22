@@ -143,6 +143,77 @@ async function run() {
     equal(card.words.join(','), ids.join(','), 'PNG signs and ordering');
     equal(w.location.href, original, 'Export leaves incoming link intact');
   }
+  // Editing a credit produces a new link while the received board remains intact.
+  for (const [ids, hosted] of [[short,true], [long,true], [short,false]]) {
+    const credited = new URL(codec.createBoardLink(ids, 'ko', '이 & 민'));
+    if (!hosted) {
+      credited.pathname = '/standalone/index.html';
+      credited.hash = codec.boardHash(ids, 'ko');
+      credited.searchParams.set('via', 'test');
+    }
+    const {w,d} = await boot({path:credited.href, hosted, languages:['en']});
+    const author = d.getElementById('board-author');
+    equal(author.value, '이 & 민', 'Credit from the link');
+    let sent, card;
+    Object.defineProperty(w.navigator, 'share', {value: async ({url}) => {sent = new URL(url);}});
+    w.ExileShare.png = async (words, lang, reading, by) => {card = {reading, by}; return new Blob();};
+    w.ExileShare.download = () => {};
+    const click = selector => d.querySelector(selector).click();
+    const send = () => {click('[data-act=export]'); click('[data-act=share]');};
+    const changeCredit = text => {
+      author.value = text;
+      author.dispatchEvent(new w.Event('input', {bubbles:true}));
+      equal(author.value, text, 'Input preserves spaces during composition');
+      author.dispatchEvent(new w.Event('change', {bubbles:true}));
+    };
+    changeCredit('  가   나 &<>#  ');
+    equal(author.value, '가 나 &<>#', 'Credit normalized on commit');
+    equal(w.location.href, credited.href, 'Credit edit preserves received address');
+    send();
+    const key = sent.pathname.match(/^\/s\/(.+)$/)?.[1];
+    equal(w.ExileShare.readBoardAt(key, sent.hash).ids.join(','), ids.join(','), 'All credited glyphs');
+    equal(sent.searchParams.get('by'), author.value, 'New credit in the exported query');
+    for (const reading of [false, true]) {
+      if (reading) click('[data-act=reveal]');
+      click('[data-act=export]'); click('[data-act=save-card]');
+      equal(card.by, author.value, 'Exported image credit');
+      equal(card.reading, reading, 'Credit independent of reading visibility');
+    }
+    changeCredit('🐈'.repeat(34));
+    equal(author.value, '🐈'.repeat(32), 'Limit counts code points, not UTF-16 units');
+    changeCredit('   '); send();
+    equal(sent.searchParams.has('by'), false, 'Intentionally anonymous copy');
+    equal(w.location.href, credited.href, 'Original after clearing draft credit');
+    if (!hosted) equal(sent.searchParams.get('via'), 'test', 'Other standalone query retained');
+  }
+  {
+    const {w,d} = await boot({path:codec.createBoardLink(short, 'ko', '친구'), hosted:true, languages:['ko']});
+    const author = () => d.querySelector('#board-author').value;
+    const click = selector => d.querySelector(selector).click();
+    const slots = () => Array.from(d.querySelectorAll('.slot-meaning'), el => el.textContent).join('|');
+    const original = slots();
+    click('[data-add]');
+    equal(author(), '친구', 'Inserting keeps the credit');
+    click('[data-act=undo]');
+    equal(author(), '친구', 'Deleting one glyph keeps the credit');
+    const example = d.querySelector('#example');
+    example.value = '0';
+    example.dispatchEvent(new w.Event('change', {bubbles:true}));
+    equal(author(), '', 'A different example starts anonymous');
+    click('[data-act=restore]');
+    equal(author(), '친구', 'Undoing example selection restores its credit');
+    equal(slots(), original, 'Undoing example selection restores original glyphs');
+    click('[data-act=clear]');
+    equal(author(), '', 'Clearing the board also clears its credit');
+    click('[data-act=restore]');
+    equal(author(), '친구', 'Undoing a full clear restores its credit');
+    equal(slots(), original, 'Undoing a full clear restores original glyphs');
+    w.ExilePhotoReader.open = (_lang, apply) => apply(['snake']);
+    click('[data-act=read-photo]');
+    equal(author(), '', 'A newly read photo starts anonymous');
+    click('[data-act=restore]');
+    equal(author(), '친구', 'Undoing photo replacement restores its credit');
+  }
   // Same fragment under a different preview key must revalidate the path.
   const original = new URL(codec.createBoardLink(short, 'ko'));
   original.hash = codec.boardHash(short, 'ko');

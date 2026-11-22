@@ -1,4 +1,4 @@
-import { parseShareKey } from './board-link.js';
+import { normalizeAuthor, parseShareKey } from './board-link.js';
 
 // Pages runs Functions only for /s/*. Both endpoints accept the exact same keys.
 export function sharedBoard(context, respond) {
@@ -10,7 +10,14 @@ export function sharedBoard(context, respond) {
   if (!board) {
     return new Response(null, { status: 404, headers: { 'X-Robots-Tag': 'noindex' } });
   }
-  return respond(board, params.key);
+  const author = normalizeAuthor(new URL(request.url).searchParams.get('by'));
+  return respond({ ...board, author }, params.key);
+}
+
+export function shareUrl(request, key, author, suffix = '') {
+  const url = new URL('/s/' + key + suffix, request.url);
+  if (author) url.searchParams.set('by', author);
+  return url.href;
 }
 
 export const shareHeaders = {

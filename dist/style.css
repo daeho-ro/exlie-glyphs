@@ -1143,6 +1143,35 @@ h1 { font-size: clamp(1.7rem, 6vw, 2rem); }
   background: #d6b36919;
 }
 .plate-tools [aria-pressed='true'] { color: #f6cf8b; }
+.board-byline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 44px;
+  margin-inline-start: auto;
+  color: #cfc6af;
+  font-size: .83rem;
+}
+.board-byline input {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 13ch;
+  max-width: min(26ch, 65vw);
+  min-height: 44px;
+  border: 0;
+  padding: 4px;
+  border-radius: 4px;
+  background: transparent;
+  color: #f5e5c8;
+  font: 400 16px/1.3 var(--ui);
+}
+@supports (field-sizing: content) {
+  .board-byline input { field-sizing: content; width: auto; }
+}
+.board-byline input::placeholder { color: #cfc6af; opacity: .9; }
+.board-byline input:focus { background: #ffffff0b; }
 .inline-picker {
   padding: 14px;
   border-bottom: 1px solid var(--rule);

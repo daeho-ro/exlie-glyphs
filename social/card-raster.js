@@ -1,5 +1,7 @@
 import {HEIGHT, MAX_CELLS, placement, WIDTH} from './card-layout.js';
 
+import {createBylinePainter} from './byline.js';
+
 const crcTable=Uint32Array.from({length:256}, (_,i)=>{
   let value=i;
   for(let bit=0;bit<8;bit++)value=(value>>>1)^((value&1)?0xedb88320:0);
@@ -21,7 +23,8 @@ dims.setUint32(0,WIDTH);
 dims.setUint32(4,HEIGHT);
 ihdr.set([8,3],8); // 8 bits per indexed pixel, one filtering byte per row.
 
-export function createBoardRenderer(art) {
+export function createBoardRenderer(art, authors) {
+  const paintByline = createBylinePainter(authors);
   const bytes=new Uint8Array(art), header=new DataView(art);
   const metaEnd=8+header.getUint32(0);
   const sprites=JSON.parse(new TextDecoder().decode(bytes.subarray(8,metaEnd)));
@@ -59,7 +62,7 @@ export function createBoardRenderer(art) {
   const end=chunk('IEND',new Uint8Array());
 
 
-  return async function renderBoardPng({ids,lang='en',total=ids?.length}) {
+  return async function renderBoardPng({ids,lang='en',total=ids?.length,author=''}) {
     if(!Array.isArray(ids)||!Number.isSafeInteger(total)||total<1)throw new RangeError('Invalid preview size');
     const truncated=total>MAX_CELLS;
     const shown=truncated?MAX_CELLS-1:total;
@@ -69,6 +72,7 @@ export function createBoardRenderer(art) {
     const pixels=background.slice();
     placement(visible.length).forEach(({x,y,size},i)=>draw(pixels,size+'/'+visible[i],x,y));
     drawCount(pixels,total,lang);
+    if (author) paintByline(pixels, rowBytes, author);
     const stream=new Blob([pixels]).stream().pipeThrough(new CompressionStream('deflate'));
     const compressed=new Uint8Array(await new Response(stream).arrayBuffer());
     const parts=[...fixed,chunk('IDAT',compressed),end];

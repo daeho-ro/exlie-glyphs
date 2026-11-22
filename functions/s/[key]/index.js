@@ -1,6 +1,6 @@
 import reader from '../../../social/reader-shell.html';
-import { sharedBoard, shareHeaders } from '../../../social/share-response.js';
-import { siteName, siteOrigin } from '../../../social/site.js';
+import { sharedBoard, shareHeaders, shareUrl } from '../../../social/share-response.js';
+import { siteName } from '../../../social/site.js';
 
 const copy = {
   ko: {
@@ -20,13 +20,19 @@ const copy = {
   },
 };
 
+function escapeAttribute(value) {
+  return value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
+}
+
 export function onRequest(context) {
-  return sharedBoard(context, ({ lang, total }, key) => {
+  return sharedBoard(context, ({ lang, total, author }, key) => {
     const { request } = context;
     const text = copy[lang];
     const title = text.title(total) + ' | ' + siteName;
-    const url = new URL('/s/' + key, request.url).href;
-    const image = url + '/card.png';
+    const url = shareUrl(request, key, author);
+    const image = shareUrl(request, key, author, '/card.png');
+    const description = author ? 'by ' + author + ' · ' + text.description : text.description;
+    const imageAlt = text.alt(total) + (author ? ' · by ' + author : '');
     const headers = {
       ...shareHeaders, 'Content-Type': 'text/html; charset=utf-8',
       'Content-Language': lang, 'Cache-Control': 'no-cache',
@@ -35,15 +41,15 @@ export function onRequest(context) {
 
     const tags = [
       ['og:type', 'website'], ['og:site_name', siteName], ['og:title', title],
-      ['og:description', text.description], ['og:locale', text.locale], ['og:url', url],
+      ['og:description', description], ['og:locale', text.locale], ['og:url', url],
       ['og:image', image], ['og:image:type', 'image/png'], ['og:image:width', '1200'],
-      ['og:image:height', '630'], ['og:image:alt', text.alt(total)],
+      ['og:image:height', '630'], ['og:image:alt', imageAlt],
       ['twitter:card', 'summary_large_image'], ['twitter:title', title],
-      ['twitter:description', text.description], ['twitter:image', image], ['twitter:image:alt', text.alt(total)],
+      ['twitter:description', description], ['twitter:image', image], ['twitter:image:alt', imageAlt],
     ];
     const meta = tags.map(([key, value]) => {
       const attribute = key.startsWith('og:') ? 'property' : 'name';
-      const escaped = value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
+      const escaped = escapeAttribute(value);
       return `<meta ${attribute}="${key}" content="${escaped}">`;
     }).join('');
     // The same static reader shell powers both the generator and a received board.
@@ -51,18 +57,20 @@ export function onRequest(context) {
       .on('html', { element(el) { el.setAttribute('lang', lang); } })
       .on('head', { element(el) {
         el.prepend('<base href="/reader/">', { html: true });
-        el.append(`<link rel="canonical" href="${siteOrigin}/"><meta name="robots" content="noindex, follow">` + meta, { html: true });
+        el.append(`<link rel="canonical" href="${escapeAttribute(url)}"><meta name="robots" content="noindex, follow">` + meta, { html: true });
       } })
       .on('main#app', { element(el) {
         // The recipient can see the board even before the reader or its webfont loads.
         el.setInnerContent(
-          `<img src="/s/${key}/card.png" alt="${text.alt(total)}" width="1200" height="630" style="display:block;width:100%;height:auto" fetchpriority="high">`,
+          `<img src="${escapeAttribute(image)}" alt="${escapeAttribute(imageAlt)}" width="1200" height="630" style="display:block;width:100%;height:auto" fetchpriority="high">`,
           { html: true },
         );
       } })
       .on('a#brand', { element(el) { el.setAttribute('href', '/'); } })
       .on('head > title', { element(el) { el.setInnerContent(title); } })
-      .on('meta[name="description"]', { element(el) { el.setAttribute('content', text.description); } })
+      .on('meta[name="description"]', { element(el) {
+        el.replace(`<meta name="description" content="${escapeAttribute(description)}">`, { html: true });
+      } })
       .transform(new Response(reader, { headers }));
   });
 }
