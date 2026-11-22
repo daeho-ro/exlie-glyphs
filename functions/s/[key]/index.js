@@ -1,6 +1,7 @@
 import reader from '../../../social/reader-shell.html';
 import { sharedBoard, shareHeaders, shareUrl } from '../../../social/share-response.js';
 import { siteName } from '../../../social/site.js';
+import { boardSchemaScript } from '../../../social/share-schema.js';
 
 const copy = {
   ko: {
@@ -57,6 +58,7 @@ export function onRequest(context) {
       .on('html', { element(el) { el.setAttribute('lang', lang); } })
       .on('head', { element(el) {
         el.prepend('<base href="/reader/">', { html: true });
+        el.append(boardSchemaScript({ url, title, description, lang, image, imageAlt, author }), { html: true });
         el.append(`<link rel="canonical" href="${escapeAttribute(url)}"><meta name="robots" content="noindex, follow">` + meta, { html: true });
       } })
       .on('main#app', { element(el) {
