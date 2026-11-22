@@ -3,7 +3,7 @@ import { css, description, tagManager, title } from './reader-template.mjs';
 export const metadata = {
   title,
   description,
-  icons: { icon: './reader/assets/divine-trial.svg' },
+  icons: { icon: './reader/assets/inscription.svg' },
 };
 export const viewport = { themeColor: '#f7f5ef' };
 

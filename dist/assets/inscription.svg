@@ -1,0 +1,11 @@
+<svg id="brand-symbol" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false">
+  <title>Exile Glyphs</title>
+  <desc>유배지 문자의 동사 ‘만들다’에서 따온 도구와 받침선, 동사점.</desc>
+  <rect width="48" height="48" rx="9" fill="#f4e6c7"/>
+  <g fill="none" stroke="#17392f" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m8 30.6 12.4-4.5m9.6-3.5 5-1.8"/>
+    <path d="m17.4 18 8.8-3.2 6.3 17.2-8.8 3.2Z"/>
+    <path d="M18.5 41h18"/>
+  </g>
+  <circle cx="23.5" cy="7.7" r="3.2" fill="#17392f"/>
+</svg>

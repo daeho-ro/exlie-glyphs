@@ -1,8 +1,10 @@
-// Only read clipboard images during an explicit paste action on this device.
+// File selection and explicit paste both deliver a local image to the photo reader.
 (() => {
   'use strict';
   const copy = {
     ko: {
+      file: '사진 선택',
+      fileType: '이미지 파일을 선택해 주세요.',
       button: '이미지 붙여넣기',
       area: '여기를 길게 눌러 붙여넣기',
       empty: '클립보드에 이미지가 없습니다. 사진이나 스크린샷을 복사해 주세요.',
@@ -10,6 +12,8 @@
         '아래 영역을 길게 눌러 붙여넣으세요. 키보드에서는 ⌘V 또는 Ctrl+V를 사용할 수 있습니다.',
     },
     en: {
+      file: 'Choose a photo',
+      fileType: 'Choose an image file.',
       button: 'Paste image',
       area: 'Press and hold here to paste',
       empty: 'Copy a photo or screenshot, then paste it here.',
@@ -17,6 +21,8 @@
         'Press and hold in the area below and choose Paste, or press ⌘V or Ctrl+V.',
     },
     ja: {
+      file: '写真を選ぶ',
+      fileType: '画像ファイルを選んでください。',
       button: '画像をペースト',
       area: '長押ししてペースト',
       empty:
@@ -45,13 +51,20 @@
   function attach(dialog, locale, load) {
     const t = copy[locale] || copy.ko;
     const host = dialog.querySelector('.ocr-upload');
+    const picker = document.createElement('label');
+    picker.className = 'action ocr-file-picker';
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    picker.append(t.file, fileInput);
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'action';
+    button.className = 'btn';
     button.dataset.pasteImage = '';
     button.textContent = t.button;
     const area = document.createElement('div');
     area.className = 'ocr-paste-area';
+    area.hidden = true;
     area.contentEditable = 'true';
     area.spellcheck = false;
     area.setAttribute('inputmode', 'none');
@@ -61,19 +74,36 @@
     const message = document.createElement('p');
     message.className = 'ocr-note';
     message.setAttribute('role', 'status');
-    host.replaceChildren(button, area, message);
+    host.replaceChildren(picker, button, area, message);
     let generation = 0;
     function receive(blob) {
       generation++;
       if (!dialog.isConnected) return;
       message.textContent = '';
+      area.hidden = true;
       load(blob);
+    }
+    fileInput.addEventListener('click', () => { generation++; });
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      fileInput.value = '';
+      if (!file) return;
+      if (file.type && !file.type.startsWith('image/')) {
+        generation++;
+        message.textContent = t.fileType;
+        return;
+      }
+      receive(file);
+    });
+    function manualPaste(messageText) {
+      message.textContent = messageText;
+      area.hidden = false;
+      area.focus({ preventScroll: true });
     }
     async function fromClipboard() {
       const ticket = ++generation;
       if (typeof navigator.clipboard?.read !== 'function') {
-        message.textContent = t.manual;
-        area.focus({ preventScroll: true });
+        manualPaste(t.manual);
         return;
       }
       try {
@@ -86,11 +116,10 @@
           if (ticket === generation) receive(blob);
           return;
         }
-        message.textContent = t.empty;
+        manualPaste(t.empty);
       } catch {
         if (ticket !== generation || !dialog.isConnected) return;
-        message.textContent = t.manual;
-        area.focus({ preventScroll: true });
+        manualPaste(t.manual);
       }
     }
     function pasted(event) {

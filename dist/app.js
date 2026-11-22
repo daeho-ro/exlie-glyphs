@@ -23,7 +23,7 @@
     title: ['유배지 문자열 생성기', 'Exile glyph generator', '流刑地の文字列メーカー'],
     examples: ['예문 고르기', 'Examples', '例文を選ぶ'],
     zone: ['구역', 'Zone', 'エリア'],
-    photo: ['이미지 붙여넣기', 'Paste image', '画像をペースト'],
+    photo: ['사진 읽기', 'Read a photo', '写真を読む'],
     empty: [
       '아래 기호를 누르면 여기에 놓입니다.',
       'Tap a sign below to place it here.',
@@ -111,11 +111,6 @@
     ],
     help: ['사용 안내', 'How to use', '使い方'],
     sources: ['문자와 출처', 'Glyphs & sources', '文字と出典'],
-    fan: [
-      '비공식 팬 프로젝트',
-      'Unofficial fan project',
-      '非公式ファンプロジェクト',
-    ],
     png: ['이미지 저장', 'Save image', '画像を保存'],
     export: ['내보내기', 'Export', '書き出す'],
     share: ['링크 공유', 'Share link', 'リンクを共有'],
@@ -286,7 +281,6 @@
     $('help').title = tr('help');
     $('close').innerHTML = ico('close');
     $('close').setAttribute('aria-label', tr('close'));
-    $('fan').textContent = tr('fan');
     $('source').textContent = tr('sources');
     $('nav').innerHTML = ['desk', 'dict']
       .map(
@@ -305,7 +299,7 @@
   async function saveCard(button) {
     button.disabled = true;
     try {
-      const blob = await share.png(state.ids.slice(), state.loc);
+      const blob = await share.png(state.ids.slice(), state.loc, state.revealed);
       share.download(blob);
       window.dataLayer?.push({ event: 'glyph_card_save' });
     } catch (error) {
@@ -462,7 +456,6 @@
         break;
       case 'read-photo':
         window.ExilePhotoReader.open(state.loc, (ids) => updateIds(ids));
-        document.querySelector('.ocr-dialog [data-paste-image]')?.click();
         break;
       case 'tail':
         state.selected = null;

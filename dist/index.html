@@ -27,7 +27,7 @@
       content="기호를 골라 나만의 유배지 문자열을 이미지로 저장하세요. 문자판 링크를 열면 같은 기호를 보고 풀이를 펼칠 수 있습니다."
     />
     <title>Exile Glyphs · 유배지 문자열 생성기</title>
-    <link rel="icon" type="image/svg+xml" href="assets/divine-trial.svg" />
+    <link rel="icon" type="image/svg+xml" href="assets/inscription.svg" />
     <link rel="stylesheet" href="assets/font.css" />
     <link rel="stylesheet" href="assets/pretendard/pretendard.css" />
     <link rel="stylesheet" href="style.css" />
@@ -48,10 +48,20 @@
   <body>
     <header class="mast">
       <div class="mast-inner">
-        <a class="brand" href="./" id="brand"
-          ><img src="assets/divine-trial.svg" width="37" height="37" alt="" />Exile
-          <i>Glyphs</i></a
-        >
+        <a class="brand" href="./" id="brand">
+          <svg id="brand-symbol" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false">
+            <title>Exile Glyphs</title>
+            <desc>유배지 문자의 동사 ‘만들다’에서 따온 도구와 받침선, 동사점.</desc>
+            <rect width="48" height="48" rx="9" fill="#f4e6c7"/>
+            <g fill="none" stroke="#17392f" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m8 30.6 12.4-4.5m9.6-3.5 5-1.8"/>
+              <path d="m17.4 18 8.8-3.2 6.3 17.2-8.8 3.2Z"/>
+              <path d="M18.5 41h18"/>
+            </g>
+            <circle cx="23.5" cy="7.7" r="3.2" fill="#17392f"/>
+          </svg>
+          <span>Exile Glyphs</span>
+        </a>
         <nav id="nav"></nav>
         <div class="global">
           <button id="help" class="help-icon" aria-label="사용 안내"></button
@@ -69,7 +79,7 @@
     <main id="app" tabindex="-1"></main>
     <footer>
       <div>
-        <span class="footer-word">Exile Glyphs</span><span id="fan"></span>
+        <span class="footer-word">Exile Glyphs</span>
       </div>
       <div class="footer-links">
         <button id="source"></button>

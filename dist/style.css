@@ -113,11 +113,11 @@ footer {
   letter-spacing: -0.06em;
   white-space: nowrap;
 }
-.brand img {
+.brand svg {
   margin-right: 7px;
 }
-.brand i {
-  font-weight: 500;
+.brand span {
+  letter-spacing: -.035em;
 }
 nav {
   display: flex;
@@ -1015,7 +1015,7 @@ body {
   font-size: clamp(1.08rem, 4.9vw, 1.45rem);
   gap: .14em;
 }
-.brand img {
+.brand svg {
   width: 29px;
   height: 29px;
   margin-right: 3px;
@@ -1229,7 +1229,7 @@ footer .footer-links {
 }
 .footer-links a { text-underline-offset: 3px; }
 @media (max-width: 365px) {
-  .mast .brand img { width: 24px; height: 24px; margin-right: 1px; }
+  .mast .brand svg { width: 24px; height: 24px; margin-right: 1px; }
   .mast .brand { font-size: 1.04rem; }
   .mast nav { gap: 0; }
   .mast nav button { padding-inline: 3px; font-size: .79rem; }

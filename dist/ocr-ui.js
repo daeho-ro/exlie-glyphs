@@ -7,12 +7,12 @@
       guide:'첫 글자의 바로 앞과 마지막 글자의 바로 뒤를 순서대로 눌러 주세요. 점을 끌어 옮길 수도 있어요.',
       start:'시작점', end:'끝점', height:'줄 높이', count:'문자 수', auto:'자동',
       read:'이 줄 읽기', working:'문자 비교 중…', finding:'읽을 줄을 찾고 있어요…',
-      picture:'줄의 시작점과 끝점을 지정할 사진', review:'인식 결과 확인', guideReview:'고칠 글자를 누르고 알맞은 뜻을 고르세요.',
-      candidates:'닮은 후보', library:'전체 문자에서 고르기', change:'범위 조정', apply:'문자판에 적용', repaste:'다른 사진 붙여넣기',
+      picture:'줄의 시작점과 끝점을 지정할 사진', review:'인식 결과 확인', countLabel:n=>n+'글자', guideReview:'고칠 글자를 누르고 알맞은 뜻을 고르세요.',
+      candidates:'닮은 후보', library:'전체 문자에서 고르기', change:'범위·글자 수 조정', apply:'문자판에 적용', back:'뒤로',
       unread:'선택 필요', empty:'글자를 찾지 못했습니다. 범위와 줄 높이를 조정해 보세요.',
       invalidCount:'줄에 보이는 글자 수를 입력하세요. 비워 두면 자동으로 셉니다.',
       next:'다음 줄 읽기', undoRow:'마지막 줄 빼기', saved:'확인한 줄', savedApply:'확인한 줄만 적용',
-      fileError:'사진을 열 수 없습니다. 브라우저에서 볼 수 있는 이미지를 복사해 붙여넣으세요.',
+      fileError:'사진을 열 수 없습니다. PNG 또는 JPEG 이미지로 다시 시도해 주세요.',
       error:'이 줄을 읽지 못했습니다. 범위를 조정한 뒤 다시 시도해 주세요.', short:'두 점 사이의 거리를 늘려 주세요.',
       cell:'문자', photo:'원본 사진 조각', picked:'선택한 문자', compare:'인식된 줄',
     },
@@ -22,12 +22,12 @@
       guide:'Tap just before the first glyph, then just past the last. You can also drag either handle.',
       start:'Start', end:'End', height:'Line height', count:'Glyph count', auto:'Auto',
       read:'Read this line', working:'Matching glyphs…', finding:'Finding a line…',
-      picture:'Photo with adjustable line endpoints', review:'Review the glyphs', guideReview:'To change a reading, tap the glyph and choose its meaning.',
-      candidates:'Closest matches', library:'Choose from all glyphs', change:'Adjust the line', apply:'Use on the board', repaste:'Paste another photo',
+      picture:'Photo with adjustable line endpoints', review:'Review the glyphs', countLabel:n=>n+(n === 1 ? ' glyph' : ' glyphs'), guideReview:'To change a reading, tap the glyph and choose its meaning.',
+      candidates:'Closest matches', library:'Choose from all glyphs', change:'Adjust line or count', apply:'Use on the board', back:'Back',
       unread:'Pick a glyph', empty:'No glyphs found. Adjust the endpoints and line height.',
       invalidCount:'Enter the number of glyphs you see, or leave it blank for an automatic count.',
       next:'Read another line', undoRow:'Remove last line', saved:'Confirmed lines', savedApply:'Use confirmed lines',
-      fileError:'This photo could not be opened. Copy and paste an image your browser can display.',
+      fileError:'Could not open this image. Try a PNG or JPEG photo.',
       error:'Could not read the line. Adjust the region and try again.', short:'Move the endpoints farther apart.',
       cell:'Glyph', photo:'Original crop', picked:'Selected glyph', compare:'Selected line',
     },
@@ -37,12 +37,12 @@
       guide:'最初の文字の手前、最後の文字のすぐ後の順にタップしてください。点をドラッグして調整もできます。',
       start:'始点', end:'終点', height:'行の高さ', count:'文字数', auto:'自動',
       read:'この行を読む', working:'文字を照合中…', finding:'行を探しています…',
-      picture:'行の始点と終点を調整する写真', review:'読み取り結果を確認', guideReview:'直したい文字をタップして、意味を選んでください。',
-      candidates:'似ている候補', library:'すべての文字から選ぶ', change:'範囲を調整', apply:'文字盤に反映', repaste:'別の写真をペースト',
+      picture:'行の始点と終点を調整する写真', review:'読み取り結果を確認', countLabel:n=>n+'文字', guideReview:'直したい文字をタップして、意味を選んでください。',
+      candidates:'似ている候補', library:'すべての文字から選ぶ', change:'範囲・文字数を調整', apply:'文字盤に反映', back:'戻る',
       unread:'選択が必要', empty:'文字が見つかりません。範囲と行の高さを調整してください。',
       invalidCount:'行に見える文字数を入力してください。空欄にすると自動で数えます。',
       next:'次の行を読む', undoRow:'最後の行を除く', saved:'確認した行', savedApply:'確認した行を反映',
-      fileError:'写真を開けません。ブラウザーで表示できる画像をコピーして貼り付けてください。',
+      fileError:'画像を開けません。PNG または JPEG でお試しください。',
       error:'行を読み取れませんでした。範囲を調整してやり直してください。', short:'始点と終点をもう少し離してください。',
       cell:'文字', photo:'元の写真の一部', picked:'選択した文字', compare:'選択した行',
     },
@@ -74,7 +74,7 @@
     const dialog = document.createElement('dialog');
     dialog.className = 'ocr-dialog';
     dialog.setAttribute('aria-labelledby','ocr-title');
-    dialog.innerHTML = `<div class="dialog-top"><h2 id="ocr-title">${t.title}</h2><button type="button" class="square" data-close aria-label="${t.close}"><svg aria-hidden="true" viewBox="0 0 24 24" class="icon"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+    dialog.innerHTML = `<div class="dialog-top"><button type="button" class="ocr-back" data-ocr-back hidden><svg viewBox="0 0 24 24" aria-hidden="true" class="icon"><path d="m14 5-7 7 7 7"/></svg>${t.back}</button><h2 id="ocr-title">${t.title}</h2><button type="button" class="square" data-close aria-label="${t.close}"><svg aria-hidden="true" viewBox="0 0 24 24" class="icon"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
       <section id="ocr-queue" hidden><b></b><div><button class="btn" data-undo-row type="button">${t.undoRow}</button> <button class="btn" data-apply-queue type="button">${t.savedApply}</button></div></section>
       <div id="ocr-status" role="status"></div><section id="ocr-region" hidden>
         <h3>${t.region}</h3><p id="ocr-guide" class="ocr-note">${t.guide}</p>
@@ -86,11 +86,11 @@
         <div class="ocr-controls"><label>${t.height}<input type="range" id="ocr-height" min="1" step="1"></label>
         <label>${t.count}<input type="number" id="ocr-count" min="1" step="1" inputmode="numeric" placeholder="${t.auto}"></label></div>
         <button type="button" class="action" data-read>${t.read}</button>
-      </section><section id="ocr-review" aria-labelledby="ocr-review-title" tabindex="-1" hidden><h3 id="ocr-review-title">${t.review}</h3>
-        <img id="ocr-strip" alt="${t.compare}"><div class="ocr-cells" role="group" aria-label="${t.picked}"></div>
+      </section><section id="ocr-review" aria-labelledby="ocr-review-title" hidden><h3 id="ocr-review-title" tabindex="-1">${t.review} <small data-result-count></small></h3>
+        <div class="ocr-strip-frame"><img id="ocr-strip" alt="${t.compare}"><span class="ocr-selected-crop" hidden aria-hidden="true"></span></div><div class="ocr-cells" role="group" aria-label="${t.picked}"></div>
         <p class="ocr-note">${t.guideReview}</p><div id="ocr-matches" hidden></div>
         <div class="ocr-foot"><button type="button" class="action" data-apply>${t.apply}</button><button type="button" class="btn" data-back>${t.change}</button><button type="button" class="btn" data-next-row>${t.next}</button></div>
-      </section><details id="ocr-paste-tools" open><summary hidden>${t.repaste}</summary><p class="ocr-note">${t.intro}</p><div class="ocr-upload"></div></details>`;
+      </section><section id="ocr-paste-tools"><p class="ocr-note">${t.intro}</p><div class="ocr-upload"></div></section>`;
     document.body.append(dialog);
     const q = selector => dialog.querySelector(selector);
     const stage = q('#ocr-stage'), thumbnail = q('canvas'), overlay = q('#ocr-stage svg');
@@ -131,16 +131,38 @@
       showQueue();
       status(message);
     }
+    function clearPhoto() {
+      ++task;
+      controller?.abort();
+      controller = null;
+      region.hidden = review.hidden = true;
+      region.inert = false;
+      q('[data-read]').disabled = false;
+      pointer = image = geometry = result = chosen = null;
+      thumbnail.width = thumbnail.height = 1;
+      q('#ocr-strip').removeAttribute('src');
+      q('.ocr-cells').replaceChildren();
+      q('#ocr-matches').replaceChildren();
+      showQueue();
+    }
+    function showPaste(message = '') {
+      clearPhoto();
+      pasteTools.hidden = false;
+      q('[data-ocr-back]').hidden = true;
+      status(message);
+      dialog.scrollTop = 0;
+      q('[data-paste-image]').focus({preventScroll:true});
+    }
     async function load(blob) {
       if (!dialog.open) return;
-      controller?.abort();
+      clearPhoto();
+      const ticket = task;
       controller = new AbortController();
       const { signal } = controller;
-      const ticket = ++task;
-      region.hidden = review.hidden = true; result = null; chosen = null; image = null; geometry = null; showQueue();
-      q('[data-read]').disabled = false; region.inert = false; pointer = null;
-      pasteTools.open = false;
-      pasteTools.querySelector('summary').hidden = false;
+      pasteTools.hidden = true;
+      const back = q('[data-ocr-back]');
+      back.hidden = false;
+      back.focus({preventScroll:true});
       status(t.finding);
       const img = new Image(), url = URL.createObjectURL(blob);
       try {
@@ -165,14 +187,12 @@
         range.max = Math.max(Math.ceil(geometry.height),Math.round(Math.min(image.width,image.height)*1.4),+range.min+1);
         range.value = geometry.height;
         q('#ocr-count').value = '';
+        q('#ocr-count').placeholder = t.auto;
         chooseEnd('start');
         if (proposal.estimated) await read();
         else showRegion(t.empty);
       } catch {
-        if(current(ticket)) {
-          status(t.fileError);
-          pasteTools.open = true;
-        }
+        if(current(ticket)) showPaste(t.fileError);
       }
       finally { URL.revokeObjectURL(url); }
     }
@@ -220,9 +240,12 @@
         if(!found.cells.length) {showRegion(t.empty); return;}
         result = found; chosen = found.cells.map(cell=>cell.candidates.find(c=>byId.has(c.id))?.id || '');
         activeCell = chosen.indexOf('');
+        q('[data-result-count]').textContent = t.countLabel(found.cells.length);
+        q('#ocr-count').placeholder = String(found.cells.length);
         region.hidden = true; review.hidden = false; q('#ocr-strip').src = result.preview;
         status(''); showQueue(); renderReview();
-        review.focus({preventScroll:true}); review.scrollIntoView({block:'nearest'});
+        dialog.scrollTop = 0;
+        q('#ocr-review-title').focus({preventScroll:true});
       } catch {if(current(ticket)) showRegion(t.error);}
       finally { if(current(ticket)) {q('[data-read]').disabled=false;region.inert=false;} }
     }
@@ -232,6 +255,13 @@
       q(`[data-cell="${activeCell < 0 ? changed : activeCell}"]`).focus({preventScroll:true});
     }
     function renderReview() {
+      const sourceBox = result.cells[activeCell]?.box;
+      const highlight = q('.ocr-selected-crop');
+      highlight.hidden = !sourceBox;
+      if (sourceBox) {
+        highlight.style.left = 100 * sourceBox.x / result.width + '%';
+        highlight.style.width = 100 * sourceBox.width / result.width + '%';
+      }
       q('.ocr-cells').innerHTML = result.cells.map((cell,i)=>{
         const word = byId.get(chosen[i]); const name = word ? label(word) : t.unread;
         return `<button type="button" data-cell="${i}" aria-label="${t.cell} ${i+1} · ${escape(name)}" aria-expanded="${i===activeCell}" aria-controls="ocr-matches" aria-pressed="${i===activeCell}"><small>${i+1}</small><img src="${cell.preview}" alt=""><b>${escape(name)}</b></button>`;
@@ -249,6 +279,7 @@
     dialog.addEventListener('click',event=>{
       const button=event.target.closest('button'); if(!button)return;
       if(button.hasAttribute('data-close')) finish();
+      else if(button.hasAttribute('data-ocr-back')) showPaste();
       else if(button.dataset.edit) chooseEnd(button.dataset.edit);
       else if(button.hasAttribute('data-read')) read();
       else if(button.hasAttribute('data-cell')) {
