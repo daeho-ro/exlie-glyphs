@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title desc">
+  <title id="title">Exile Glyphs · 신의 시험</title>
+  <desc id="desc">구역 4 표제의 두 글자에서 모래시계와 점을 품은 열린 마름모를 따와 한 인장으로 엮었다.</desc>
+  <rect x=".6" y=".6" width="46.8" height="46.8" rx="8" fill="#843e2d" stroke="#cb9471" stroke-width="1.2"/>
+  <g fill="none" stroke="#fff0d0" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M15.5 8.5H32.5L16.5 22.5H31.5Z"/>
+    <path d="M14 21.5 8.5 27.5 24 41.5 39.5 27.5 34 21.5"/>
+  </g>
+  <circle cx="24" cy="30" r="2.65" fill="#fff0d0"/>
+</svg>

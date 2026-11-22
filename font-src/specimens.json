@@ -1,0 +1,2284 @@
+{
+  "unitsPerCell": 160,
+  "used": {
+    "bird": {
+      "code": 57345,
+      "evidence": "panel",
+      "cell": "3L:1.1",
+      "root": "bird",
+      "role": "noun"
+    },
+    "eat": {
+      "code": 57346,
+      "evidence": "panel",
+      "cell": "11:2.2",
+      "root": "eat",
+      "role": "verb"
+    },
+    "spider": {
+      "code": 57347,
+      "evidence": "panel",
+      "cell": "3L:6.3",
+      "root": "spider",
+      "role": "noun"
+    },
+    "person": {
+      "code": 57348,
+      "evidence": "panel",
+      "cell": "11:2.1",
+      "root": "person",
+      "role": "noun"
+    },
+    "fruit": {
+      "code": 57349,
+      "evidence": "panel",
+      "cell": "3L:3.1",
+      "root": "fruit",
+      "role": "noun"
+    },
+    "cow": {
+      "code": 57350,
+      "evidence": "panel",
+      "cell": "3L:5.1",
+      "root": "cow",
+      "role": "noun"
+    },
+    "grass": {
+      "code": 57351,
+      "evidence": "panel",
+      "cell": "3L:5.3",
+      "root": "grass",
+      "role": "noun"
+    },
+    "snake": {
+      "code": 57352,
+      "evidence": "panel",
+      "cell": "11:1.1",
+      "root": "snake",
+      "role": "noun"
+    },
+    "can": {
+      "code": 57353,
+      "evidence": "panel",
+      "cell": "3L:1.2"
+    },
+    "sound": {
+      "code": 57354,
+      "evidence": "panel",
+      "cell": "3L:1.3",
+      "root": "sound",
+      "role": "verb"
+    },
+    "make": {
+      "code": 57355,
+      "evidence": "panel",
+      "cell": "3L:8.2",
+      "root": "make",
+      "role": "verb"
+    },
+    "house": {
+      "code": 57356,
+      "evidence": "panel",
+      "cell": "3L:8.3",
+      "root": "house",
+      "role": "noun"
+    },
+    "from": {
+      "code": 57357,
+      "evidence": "panel",
+      "cell": "3L:8.4"
+    },
+    "tree": {
+      "code": 57358,
+      "evidence": "panel",
+      "cell": "6:1.1",
+      "root": "tree",
+      "role": "noun"
+    },
+    "have": {
+      "code": 57359,
+      "evidence": "panel",
+      "cell": "11:1.2",
+      "root": "have",
+      "role": "verb"
+    },
+    "two": {
+      "code": 57360,
+      "evidence": "panel",
+      "cell": "14:2.4"
+    },
+    "arm": {
+      "code": 57361,
+      "evidence": "panel",
+      "cell": "3R:1.4",
+      "root": "arm",
+      "role": "noun"
+    },
+    "zero": {
+      "code": 57362,
+      "evidence": "panel",
+      "cell": "14:1.5"
+    },
+    "leg": {
+      "code": 57363,
+      "evidence": "panel",
+      "cell": "3R:3.4",
+      "root": "leg",
+      "role": "noun"
+    },
+    "four": {
+      "code": 57364,
+      "evidence": "panel",
+      "cell": "14:2.5"
+    },
+    "head": {
+      "code": 57365,
+      "evidence": "panel",
+      "cell": "3R:5.3",
+      "root": "head",
+      "role": "noun"
+    },
+    "and": {
+      "code": 57366,
+      "evidence": "panel",
+      "cell": "3R:5.4"
+    },
+    "tail": {
+      "code": 57367,
+      "evidence": "panel",
+      "cell": "11:3.2",
+      "root": "tail",
+      "role": "noun"
+    },
+    "eight": {
+      "code": 57368,
+      "evidence": "panel",
+      "cell": "3R:6.3"
+    },
+    "egg": {
+      "code": 57369,
+      "evidence": "panel",
+      "cell": "3R:7.3",
+      "root": "egg",
+      "role": "noun"
+    },
+    "plural": {
+      "code": 57370,
+      "evidence": "panel",
+      "cell": "3R:7.4"
+    },
+    "become": {
+      "code": 57371,
+      "evidence": "panel",
+      "cell": "3R:8.2",
+      "root": "become",
+      "role": "verb"
+    },
+    "small": {
+      "code": 57372,
+      "evidence": "panel",
+      "cell": "3R:8.3",
+      "root": "small",
+      "role": "adjective"
+    },
+    "cannot-negation": {
+      "code": 57373,
+      "evidence": "panel",
+      "cell": "3L:3.3",
+      "root": "cannot-negation",
+      "role": "verb"
+    },
+    "road": {
+      "code": 57374,
+      "evidence": "panel",
+      "cell": "1:1.3",
+      "root": "road",
+      "role": "noun"
+    },
+    "on": {
+      "code": 57375,
+      "evidence": "panel",
+      "cell": "1:1.4",
+      "root": "on",
+      "role": "adverb"
+    },
+    "end": {
+      "code": 57376,
+      "evidence": "panel",
+      "cell": "1:2.4",
+      "root": "end",
+      "role": "adverb"
+    },
+    "see": {
+      "code": 57377,
+      "evidence": "panel",
+      "cell": "5:1.2",
+      "root": "see",
+      "role": "verb"
+    },
+    "here": {
+      "code": 57378,
+      "evidence": "panel",
+      "cell": "12:2.4",
+      "root": "here",
+      "role": "noun"
+    },
+    "unequal": {
+      "code": 57379,
+      "evidence": "handwriting-and-tiles",
+      "cell": "2"
+    },
+    "life": {
+      "code": 57380,
+      "evidence": "transcribed-composition",
+      "cell": "2",
+      "root": "live",
+      "role": "noun"
+    },
+    "death": {
+      "code": 57381,
+      "evidence": "transcribed-composition",
+      "cell": "2",
+      "root": "die",
+      "role": "noun"
+    },
+    "lower": {
+      "code": 57382,
+      "evidence": "panel",
+      "cell": "4:5.4",
+      "root": "below",
+      "role": "adjective"
+    },
+    "here-location": {
+      "code": 57383,
+      "evidence": "transcribed-composition",
+      "cell": "2",
+      "root": "here",
+      "role": "adverb"
+    },
+    "then": {
+      "code": 57384,
+      "evidence": "panel",
+      "cell": "11:2.4"
+    },
+    "contest": {
+      "code": 57385,
+      "evidence": "inventory-match",
+      "cell": "2",
+      "root": "contest",
+      "role": "noun"
+    },
+    "one": {
+      "code": 57386,
+      "evidence": "panel",
+      "cell": "6:4.1"
+    },
+    "or": {
+      "code": 57387,
+      "evidence": "panel",
+      "cell": "15L:2.5"
+    },
+    "you": {
+      "code": 57388,
+      "evidence": "panel",
+      "cell": "4:5.1",
+      "root": "you",
+      "role": "noun"
+    },
+    "live": {
+      "code": 57389,
+      "evidence": "transcribed-composition",
+      "cell": "2",
+      "root": "live",
+      "role": "verb"
+    },
+    "way": {
+      "code": 57390,
+      "evidence": "panel",
+      "cell": "12:3.7",
+      "root": "way",
+      "role": "noun"
+    },
+    "first": {
+      "code": 57391,
+      "evidence": "endpoint-comparison",
+      "cell": "2"
+    },
+    "pass": {
+      "code": 57392,
+      "evidence": "panel",
+      "cell": "4:5.9",
+      "root": "pass",
+      "role": "verb"
+    },
+    "divine": {
+      "code": 57393,
+      "evidence": "panel",
+      "cell": "4T:1.1",
+      "root": "god",
+      "role": "adjective"
+    },
+    "trial": {
+      "code": 57394,
+      "evidence": "panel",
+      "cell": "4T:1.2",
+      "root": "trial",
+      "role": "noun"
+    },
+    "second": {
+      "code": 57395,
+      "evidence": "endpoint-comparison",
+      "cell": "2"
+    },
+    "sixth": {
+      "code": 57396,
+      "evidence": "panel",
+      "cell": "12:4.3"
+    },
+    "day": {
+      "code": 57397,
+      "evidence": "panel",
+      "cell": "14:2.2",
+      "root": "day",
+      "role": "noun"
+    },
+    "win": {
+      "code": 57398,
+      "evidence": "inventory-match",
+      "cell": "2",
+      "root": "win",
+      "role": "verb"
+    },
+    "final": {
+      "code": 57399,
+      "evidence": "transcribed-composition",
+      "cell": "2",
+      "root": "end",
+      "role": "adjective"
+    },
+    "grid": {
+      "code": 57400,
+      "evidence": "panel",
+      "cell": "4:1.1",
+      "root": "grid",
+      "role": "noun"
+    },
+    "number": {
+      "code": 57401,
+      "evidence": "panel",
+      "cell": "8T:1.1",
+      "root": "number",
+      "role": "noun"
+    },
+    "grid-adj": {
+      "code": 57402,
+      "evidence": "panel",
+      "cell": "4:2.1",
+      "root": "grid",
+      "role": "adjective"
+    },
+    "horizontal": {
+      "code": 57403,
+      "evidence": "panel",
+      "cell": "4:2.2",
+      "root": "horizontal",
+      "role": "adjective"
+    },
+    "number-adj": {
+      "code": 57404,
+      "evidence": "panel",
+      "cell": "4:2.3",
+      "root": "number",
+      "role": "adjective"
+    },
+    "total": {
+      "code": 57405,
+      "evidence": "panel",
+      "cell": "4:2.5",
+      "root": "combine",
+      "role": "noun"
+    },
+    "equal": {
+      "code": 57406,
+      "evidence": "panel",
+      "cell": "6:1.4"
+    },
+    "vertical": {
+      "code": 57407,
+      "evidence": "panel",
+      "cell": "4:3.1",
+      "root": "vertical",
+      "role": "adjective"
+    },
+    "diagonal": {
+      "code": 57408,
+      "evidence": "panel",
+      "cell": "4:4.1",
+      "root": "diagonal",
+      "role": "adjective"
+    },
+    "scorpion-adj": {
+      "code": 57409,
+      "evidence": "panel",
+      "cell": "11:3.1",
+      "root": "scorpion",
+      "role": "adjective"
+    },
+    "constellation": {
+      "code": 57410,
+      "evidence": "panel",
+      "cell": "5:1.4",
+      "root": "constellation",
+      "role": "noun"
+    },
+    "shadow": {
+      "code": 57411,
+      "evidence": "panel",
+      "cell": "5:2.1",
+      "root": "shadow",
+      "role": "noun"
+    },
+    "below": {
+      "code": 57412,
+      "evidence": "panel",
+      "cell": "5:2.4",
+      "root": "below",
+      "role": "adverb"
+    },
+    "combine": {
+      "code": 57413,
+      "evidence": "panel",
+      "cell": "6:1.2",
+      "root": "combine",
+      "role": "verb"
+    },
+    "fire": {
+      "code": 57414,
+      "evidence": "panel",
+      "cell": "6:1.3",
+      "root": "fire",
+      "role": "noun"
+    },
+    "charcoal": {
+      "code": 57415,
+      "evidence": "panel",
+      "cell": "6:1.5",
+      "root": "charcoal",
+      "role": "noun"
+    },
+    "red": {
+      "code": 57416,
+      "evidence": "panel",
+      "cell": "6:2.1",
+      "root": "red",
+      "role": "noun"
+    },
+    "blue": {
+      "code": 57417,
+      "evidence": "panel",
+      "cell": "6:2.3",
+      "root": "blue",
+      "role": "noun"
+    },
+    "purple": {
+      "code": 57418,
+      "evidence": "panel",
+      "cell": "6:2.5",
+      "root": "purple",
+      "role": "noun"
+    },
+    "sand": {
+      "code": 57419,
+      "evidence": "panel",
+      "cell": "6:3.1",
+      "root": "sand",
+      "role": "noun"
+    },
+    "glass": {
+      "code": 57420,
+      "evidence": "panel",
+      "cell": "6:3.5",
+      "root": "glass",
+      "role": "noun"
+    },
+    "subtract": {
+      "code": 57421,
+      "evidence": "panel",
+      "cell": "6:4.3",
+      "root": "subtract",
+      "role": "verb"
+    },
+    "five": {
+      "code": 57422,
+      "evidence": "panel",
+      "cell": "6:4.4"
+    },
+    "six": {
+      "code": 57423,
+      "evidence": "panel",
+      "cell": "6:4.6"
+    },
+    "sea": {
+      "code": 57424,
+      "evidence": "panel",
+      "cell": "6:5.1",
+      "root": "sea",
+      "role": "noun"
+    },
+    "water": {
+      "code": 57425,
+      "evidence": "panel",
+      "cell": "6:5.3",
+      "root": "water",
+      "role": "noun"
+    },
+    "salt": {
+      "code": 57426,
+      "evidence": "panel",
+      "cell": "6:5.5",
+      "root": "salt",
+      "role": "noun"
+    },
+    "clear": {
+      "code": 57427,
+      "evidence": "panel",
+      "cell": "6:6.3",
+      "root": "clear",
+      "role": "noun"
+    },
+    "seven": {
+      "code": 57428,
+      "evidence": "panel",
+      "cell": "15L:1.4"
+    },
+    "three": {
+      "code": 57429,
+      "evidence": "panel",
+      "cell": "14:4.6"
+    },
+    "nine": {
+      "code": 57430,
+      "evidence": "panel",
+      "cell": "8:1.1"
+    },
+    "die": {
+      "code": 57431,
+      "evidence": "panel",
+      "cell": "11:2.6",
+      "root": "die",
+      "role": "verb"
+    },
+    "large": {
+      "code": 57432,
+      "evidence": "panel",
+      "cell": "9:1.5",
+      "root": "large",
+      "role": "adjective"
+    },
+    "with-spear": {
+      "code": 57433,
+      "evidence": "panel",
+      "cell": "9:1.7",
+      "root": "with-spear",
+      "role": "adverb"
+    },
+    "color": {
+      "code": 57434,
+      "evidence": "dial",
+      "cell": "10",
+      "root": "color",
+      "role": "noun"
+    },
+    "white": {
+      "code": 57435,
+      "evidence": "dial",
+      "cell": "10",
+      "root": "white",
+      "role": "noun"
+    },
+    "poison": {
+      "code": 57436,
+      "evidence": "panel",
+      "cell": "11:1.3",
+      "root": "poison",
+      "role": "noun"
+    },
+    "scorpion": {
+      "code": 57437,
+      "evidence": "panel",
+      "cell": "11:4.1",
+      "root": "scorpion",
+      "role": "noun"
+    },
+    "dwell": {
+      "code": 57438,
+      "evidence": "panel",
+      "cell": "11:4.2",
+      "root": "house",
+      "role": "verb"
+    },
+    "black": {
+      "code": 57439,
+      "evidence": "panel",
+      "cell": "13L:1.1",
+      "root": "black",
+      "role": "adjective"
+    },
+    "hole": {
+      "code": 57440,
+      "evidence": "panel",
+      "cell": "12T:1.2",
+      "root": "hole",
+      "role": "noun"
+    },
+    "god": {
+      "code": 57441,
+      "evidence": "panel",
+      "cell": "12:1.1",
+      "root": "god",
+      "role": "noun"
+    },
+    "sun": {
+      "code": 57442,
+      "evidence": "panel",
+      "cell": "14:4.3",
+      "root": "sun",
+      "role": "noun"
+    },
+    "moon": {
+      "code": 57443,
+      "evidence": "panel",
+      "cell": "12:2.2",
+      "root": "moon",
+      "role": "noun"
+    },
+    "know": {
+      "code": 57444,
+      "evidence": "panel",
+      "cell": "12:3.3",
+      "root": "head",
+      "role": "verb"
+    },
+    "seeing": {
+      "code": 57445,
+      "evidence": "panel",
+      "cell": "12:3.6",
+      "root": "see",
+      "role": "adjective"
+    },
+    "dead": {
+      "code": 57446,
+      "evidence": "panel",
+      "cell": "13L:1.5",
+      "root": "die",
+      "role": "adjective"
+    },
+    "cover": {
+      "code": 57447,
+      "evidence": "panel",
+      "cell": "12:4.6",
+      "root": "shadow",
+      "role": "verb"
+    },
+    "daylight": {
+      "code": 57448,
+      "evidence": "panel",
+      "cell": "12:5.1",
+      "root": "daylight",
+      "role": "noun"
+    },
+    "night": {
+      "code": 57449,
+      "evidence": "panel",
+      "cell": "12:5.3",
+      "root": "night",
+      "role": "noun"
+    },
+    "in-hole": {
+      "code": 57450,
+      "evidence": "panel",
+      "cell": "12:7.5",
+      "root": "hole",
+      "role": "adverb"
+    },
+    "hour": {
+      "code": 57451,
+      "evidence": "panel",
+      "cell": "14:1.2",
+      "root": "hour",
+      "role": "noun"
+    },
+    "minute": {
+      "code": 57452,
+      "evidence": "panel",
+      "cell": "14:1.6",
+      "root": "minute",
+      "role": "noun"
+    },
+    "earth": {
+      "code": 57453,
+      "evidence": "panel",
+      "cell": "14:3.1",
+      "root": "earth",
+      "role": "noun"
+    },
+    "turn": {
+      "code": 57454,
+      "evidence": "panel",
+      "cell": "14:3.2",
+      "root": "turn",
+      "role": "verb"
+    },
+    "person-adj": {
+      "code": 57455,
+      "evidence": "panel",
+      "cell": "15L:1.1",
+      "root": "person",
+      "role": "adjective"
+    },
+    "upper": {
+      "code": 57456,
+      "evidence": "panel",
+      "cell": "15R:1.1",
+      "root": "on",
+      "role": "adjective"
+    },
+    "left": {
+      "code": 57457,
+      "evidence": "panel",
+      "cell": "15R:2.1",
+      "root": "left",
+      "role": "adjective"
+    },
+    "right": {
+      "code": 57458,
+      "evidence": "panel",
+      "cell": "15R:2.3",
+      "root": "right",
+      "role": "adjective"
+    },
+    "hear": {
+      "code": 57459,
+      "evidence": "panel",
+      "cell": "15R:2.5",
+      "root": "hear",
+      "role": "verb"
+    },
+    "food": {
+      "code": 57460,
+      "evidence": "spoken-composition",
+      "cell": "dispensers",
+      "root": "eat",
+      "role": "noun"
+    },
+    "edible": {
+      "code": 57461,
+      "evidence": "spoken-composition",
+      "cell": "dispensers",
+      "root": "eat",
+      "role": "adjective"
+    }
+  },
+  "roots": {
+    "bird": 57345,
+    "spider": 57347,
+    "person": 57348,
+    "fruit": 57349,
+    "cow": 57350,
+    "grass": 57351,
+    "snake": 57352,
+    "house": 57356,
+    "tree": 57358,
+    "arm": 57361,
+    "leg": 57363,
+    "head": 57365,
+    "tail": 57367,
+    "egg": 57369,
+    "road": 57374,
+    "here": 57378,
+    "live": 57389,
+    "die": 57431,
+    "contest": 57385,
+    "you": 57388,
+    "way": 57390,
+    "trial": 57394,
+    "day": 57397,
+    "grid": 57400,
+    "number": 57401,
+    "combine": 57413,
+    "constellation": 57410,
+    "shadow": 57411,
+    "fire": 57414,
+    "charcoal": 57415,
+    "red": 57416,
+    "blue": 57417,
+    "purple": 57418,
+    "sand": 57419,
+    "glass": 57420,
+    "sea": 57424,
+    "water": 57425,
+    "salt": 57426,
+    "clear": 57427,
+    "color": 57434,
+    "poison": 57436,
+    "scorpion": 57437,
+    "hole": 57440,
+    "god": 57441,
+    "sun": 57442,
+    "moon": 57443,
+    "daylight": 57448,
+    "night": 57449,
+    "hour": 57451,
+    "minute": 57452,
+    "earth": 57453,
+    "eat": 57346,
+    "sound": 57354,
+    "make": 57355,
+    "have": 57359,
+    "become": 57371,
+    "cannot-negation": 57373,
+    "see": 57377,
+    "pass": 57392,
+    "win": 57398,
+    "subtract": 57421,
+    "turn": 57454,
+    "hear": 57459,
+    "small": 57372,
+    "below": 57412,
+    "end": 57376,
+    "horizontal": 57403,
+    "vertical": 57407,
+    "diagonal": 57408,
+    "large": 57432,
+    "black": 57439,
+    "on": 57375,
+    "left": 57457,
+    "right": 57458,
+    "with-spear": 57433,
+    "white": 57435
+  },
+  "unresolved": {},
+  "ordinals": {
+    "first": {
+      "base": "one",
+      "tip": [
+        80,
+        96
+      ]
+    },
+    "second": {
+      "base": "two",
+      "tip": [
+        90,
+        146
+      ]
+    }
+  },
+  "markers": {
+    "noun": {
+      "sampleCount": 118,
+      "width": 126.0,
+      "height": 19.0,
+      "axisAngle": -0.01
+    },
+    "verb": {
+      "sampleCount": 55,
+      "width": 29.0,
+      "height": 29.0,
+      "axisAngle": null
+    },
+    "adjective": {
+      "sampleCount": 31,
+      "width": 51.0,
+      "height": 33.0,
+      "axisAngle": -24.18
+    },
+    "adverb": {
+      "sampleCount": 7,
+      "width": 52.0,
+      "height": 33.0,
+      "axisAngle": 23.62
+    }
+  },
+  "measurements": {
+    "can": {
+      "cell": "3L:1.2",
+      "plate": "p0-0",
+      "bounds": [
+        140.0,
+        69.82,
+        192.0,
+        132.22
+      ],
+      "pitch": 52,
+      "samples": 6
+    },
+    "from": {
+      "cell": "3L:8.4",
+      "plate": "p0-0",
+      "bounds": [
+        244.0,
+        503.82,
+        296.0,
+        566.22
+      ],
+      "pitch": 52,
+      "samples": 1
+    },
+    "two": {
+      "cell": "14:2.4",
+      "plate": "p3-0",
+      "bounds": [
+        671.05,
+        134.37,
+        727.95,
+        202.65
+      ],
+      "pitch": 56.9,
+      "samples": 2
+    },
+    "zero": {
+      "cell": "14:1.5",
+      "plate": "p3-0",
+      "bounds": [
+        727.95,
+        67.47,
+        784.85,
+        135.75
+      ],
+      "pitch": 56.9,
+      "samples": 1
+    },
+    "four": {
+      "cell": "14:2.5",
+      "plate": "p3-0",
+      "bounds": [
+        727.95,
+        134.37,
+        784.85,
+        202.65
+      ],
+      "pitch": 56.9,
+      "samples": 1
+    },
+    "and": {
+      "cell": "3R:5.4",
+      "plate": "p0-0",
+      "bounds": [
+        1418.0,
+        564.82,
+        1470.0,
+        627.22
+      ],
+      "pitch": 52,
+      "samples": 1
+    },
+    "eight": {
+      "cell": "3R:6.3",
+      "plate": "p0-0",
+      "bounds": [
+        1366.0,
+        626.82,
+        1418.0,
+        689.22
+      ],
+      "pitch": 52,
+      "samples": 1
+    },
+    "plural": {
+      "cell": "3R:7.4",
+      "plate": "p0-0",
+      "bounds": [
+        1418.0,
+        688.82,
+        1470.0,
+        751.22
+      ],
+      "pitch": 52,
+      "samples": 1
+    },
+    "then": {
+      "cell": "11:2.4",
+      "plate": "p6-0",
+      "bounds": [
+        209.45,
+        318.33,
+        275.35,
+        397.41
+      ],
+      "pitch": 65.9,
+      "samples": 3
+    },
+    "one": {
+      "cell": "6:4.1",
+      "plate": "p3-3",
+      "bounds": [
+        54.68,
+        372.6,
+        142.12,
+        477.54
+      ],
+      "pitch": 87.45,
+      "samples": 4
+    },
+    "or": {
+      "cell": "15L:2.5",
+      "plate": "p1-0",
+      "bounds": [
+        216.61,
+        106.85,
+        258.47,
+        157.08
+      ],
+      "pitch": 41.86,
+      "samples": 1
+    },
+    "sixth": {
+      "cell": "12:4.3",
+      "plate": "p7-0",
+      "bounds": [
+        129.82,
+        247.26,
+        159.97,
+        283.44
+      ],
+      "pitch": 30.15,
+      "samples": 1
+    },
+    "equal": {
+      "cell": "6:1.4",
+      "plate": "p3-3",
+      "bounds": [
+        317.02,
+        59.1,
+        404.47,
+        164.04
+      ],
+      "pitch": 87.45,
+      "samples": 8
+    },
+    "five": {
+      "cell": "6:4.4",
+      "plate": "p3-3",
+      "bounds": [
+        317.02,
+        372.6,
+        404.47,
+        477.54
+      ],
+      "pitch": 87.45,
+      "samples": 1
+    },
+    "six": {
+      "cell": "6:4.6",
+      "plate": "p3-3",
+      "bounds": [
+        491.92,
+        372.6,
+        579.38,
+        477.54
+      ],
+      "pitch": 87.45,
+      "samples": 1
+    },
+    "seven": {
+      "cell": "15L:1.4",
+      "plate": "p1-0",
+      "bounds": [
+        174.75,
+        57.3,
+        216.61,
+        107.53
+      ],
+      "pitch": 41.86,
+      "samples": 1
+    },
+    "three": {
+      "cell": "14:4.6",
+      "plate": "p3-0",
+      "bounds": [
+        784.85,
+        268.17,
+        841.75,
+        336.45
+      ],
+      "pitch": 56.9,
+      "samples": 1
+    },
+    "nine": {
+      "cell": "8:1.1",
+      "plate": "p3-1",
+      "bounds": [
+        216.5,
+        533.3,
+        289.5,
+        620.9
+      ],
+      "pitch": 73,
+      "samples": 1
+    },
+    "bird": {
+      "cell": "3L:1.1",
+      "plate": "p0-0",
+      "bounds": [
+        88.0,
+        69.82,
+        140.0,
+        132.22
+      ],
+      "pitch": 52,
+      "samples": 5,
+      "anchorOffset": [
+        -0.4,
+        -1.4
+      ]
+    },
+    "spider": {
+      "cell": "3L:6.3",
+      "plate": "p0-0",
+      "bounds": [
+        192.0,
+        379.82,
+        244.0,
+        442.22
+      ],
+      "pitch": 52,
+      "samples": 2,
+      "anchorOffset": [
+        -1.1,
+        -1.1
+      ]
+    },
+    "person": {
+      "cell": "11:2.1",
+      "plate": "p6-0",
+      "bounds": [
+        11.75,
+        318.33,
+        77.65,
+        397.41
+      ],
+      "pitch": 65.9,
+      "samples": 8,
+      "anchorOffset": [
+        -0.2,
+        -0.3
+      ]
+    },
+    "fruit": {
+      "cell": "3L:3.1",
+      "plate": "p0-0",
+      "bounds": [
+        88.0,
+        193.82,
+        140.0,
+        256.22
+      ],
+      "pitch": 52,
+      "samples": 2,
+      "anchorOffset": [
+        -0.9,
+        2.4
+      ]
+    },
+    "cow": {
+      "cell": "3L:5.1",
+      "plate": "p0-0",
+      "bounds": [
+        88.0,
+        317.82,
+        140.0,
+        380.22
+      ],
+      "pitch": 52,
+      "samples": 2,
+      "anchorOffset": [
+        -1.7,
+        -2.1
+      ]
+    },
+    "grass": {
+      "cell": "3L:5.3",
+      "plate": "p0-0",
+      "bounds": [
+        192.0,
+        317.82,
+        244.0,
+        380.22
+      ],
+      "pitch": 52,
+      "samples": 1,
+      "anchorOffset": [
+        -3.8,
+        -2.9
+      ]
+    },
+    "snake": {
+      "cell": "11:1.1",
+      "plate": "p6-0",
+      "bounds": [
+        11.75,
+        239.93,
+        77.65,
+        319.01
+      ],
+      "pitch": 65.9,
+      "samples": 1,
+      "anchorOffset": [
+        -0.0,
+        0.0
+      ]
+    },
+    "house": {
+      "cell": "11:4.2",
+      "plate": "p6-0",
+      "bounds": [
+        77.65,
+        475.13,
+        143.55,
+        554.21
+      ],
+      "pitch": 65.9,
+      "samples": 1,
+      "anchorOffset": [
+        0.1,
+        -0.6
+      ]
+    },
+    "tree": {
+      "cell": "6:1.1",
+      "plate": "p3-3",
+      "bounds": [
+        54.68,
+        59.1,
+        142.12,
+        164.04
+      ],
+      "pitch": 87.45,
+      "samples": 1,
+      "anchorOffset": [
+        -0.8,
+        -0.4
+      ]
+    },
+    "arm": {
+      "cell": "3R:1.4",
+      "plate": "p0-0",
+      "bounds": [
+        1418.0,
+        316.82,
+        1470.0,
+        379.22
+      ],
+      "pitch": 52,
+      "samples": 2,
+      "anchorOffset": [
+        -1.9,
+        -1.2
+      ]
+    },
+    "leg": {
+      "cell": "3R:3.4",
+      "plate": "p0-0",
+      "bounds": [
+        1418.0,
+        440.82,
+        1470.0,
+        503.22
+      ],
+      "pitch": 52,
+      "samples": 3,
+      "anchorOffset": [
+        -1.5,
+        -1.8
+      ]
+    },
+    "head": {
+      "cell": "3R:5.3",
+      "plate": "p0-0",
+      "bounds": [
+        1366.0,
+        564.82,
+        1418.0,
+        627.22
+      ],
+      "pitch": 52,
+      "samples": 2,
+      "anchorOffset": [
+        -4.0,
+        -2.1
+      ]
+    },
+    "tail": {
+      "cell": "11:3.2",
+      "plate": "p6-0",
+      "bounds": [
+        77.65,
+        396.73,
+        143.55,
+        475.81
+      ],
+      "pitch": 65.9,
+      "samples": 1,
+      "anchorOffset": [
+        -0.3,
+        -0.8
+      ]
+    },
+    "egg": {
+      "cell": "3R:7.3",
+      "plate": "p0-0",
+      "bounds": [
+        1366.0,
+        688.82,
+        1418.0,
+        751.22
+      ],
+      "pitch": 52,
+      "samples": 2,
+      "anchorOffset": [
+        0.3,
+        -2.2
+      ]
+    },
+    "road": {
+      "cell": "1:1.3",
+      "plate": "p4-1",
+      "bounds": [
+        433.75,
+        375.2,
+        478.85,
+        429.32
+      ],
+      "pitch": 45.1,
+      "samples": 4,
+      "anchorOffset": [
+        -1.2,
+        1.0
+      ]
+    },
+    "here": {
+      "cell": "12:2.4",
+      "plate": "p7-0",
+      "bounds": [
+        159.97,
+        176.1,
+        190.12,
+        212.28
+      ],
+      "pitch": 30.15,
+      "samples": 1,
+      "anchorOffset": [
+        6.1,
+        2.6
+      ]
+    },
+    "die": {
+      "cell": "11:2.6",
+      "plate": "p6-0",
+      "bounds": [
+        341.25,
+        318.33,
+        407.15,
+        397.41
+      ],
+      "pitch": 65.9,
+      "samples": 5,
+      "anchorOffset": [
+        0.1,
+        0.3
+      ]
+    },
+    "you": {
+      "cell": "4:5.1",
+      "plate": "p7-1",
+      "bounds": [
+        33.08,
+        328.76,
+        75.12,
+        379.22
+      ],
+      "pitch": 42.05,
+      "samples": 8,
+      "anchorOffset": [
+        -1.8,
+        -2.1
+      ]
+    },
+    "way": {
+      "cell": "12:3.7",
+      "plate": "p7-0",
+      "bounds": [
+        250.43,
+        211.68,
+        280.57,
+        247.86
+      ],
+      "pitch": 30.15,
+      "samples": 1,
+      "anchorOffset": [
+        14.3,
+        4.0
+      ]
+    },
+    "trial": {
+      "cell": "4T:1.2",
+      "plate": "p7-1",
+      "bounds": [
+        261.3,
+        22.44,
+        328.1,
+        102.6
+      ],
+      "pitch": 66.8,
+      "samples": 5,
+      "anchorOffset": [
+        0.7,
+        0.1
+      ]
+    },
+    "day": {
+      "cell": "14:2.2",
+      "plate": "p3-0",
+      "bounds": [
+        557.25,
+        134.37,
+        614.15,
+        202.65
+      ],
+      "pitch": 56.9,
+      "samples": 3,
+      "anchorOffset": [
+        -0.3,
+        3.5
+      ]
+    },
+    "grid": {
+      "cell": "4:1.1",
+      "plate": "p7-1",
+      "bounds": [
+        33.08,
+        129.56,
+        75.12,
+        180.02
+      ],
+      "pitch": 42.05,
+      "samples": 3,
+      "anchorOffset": [
+        -2.5,
+        1.3
+      ]
+    },
+    "number": {
+      "cell": "8T:1.1",
+      "plate": "p3-1",
+      "bounds": [
+        209.1,
+        51.16,
+        280.9,
+        137.32
+      ],
+      "pitch": 71.8,
+      "samples": 1,
+      "anchorOffset": [
+        0.6,
+        0.2
+      ]
+    },
+    "combine": {
+      "cell": "6:1.2",
+      "plate": "p3-3",
+      "bounds": [
+        142.13,
+        59.1,
+        229.58,
+        164.04
+      ],
+      "pitch": 87.45,
+      "samples": 4,
+      "anchorOffset": [
+        -0.4,
+        -0.4
+      ]
+    },
+    "constellation": {
+      "cell": "5:1.4",
+      "plate": "p4-0",
+      "bounds": [
+        576.4,
+        62.82,
+        631.2,
+        128.58
+      ],
+      "pitch": 54.8,
+      "samples": 1,
+      "anchorOffset": [
+        -0.9,
+        -1.0
+      ]
+    },
+    "shadow": {
+      "cell": "5:2.1",
+      "plate": "p4-0",
+      "bounds": [
+        412.0,
+        128.02,
+        466.8,
+        193.78
+      ],
+      "pitch": 54.8,
+      "samples": 1,
+      "anchorOffset": [
+        -0.1,
+        -1.0
+      ]
+    },
+    "fire": {
+      "cell": "6:1.3",
+      "plate": "p3-3",
+      "bounds": [
+        229.58,
+        59.1,
+        317.03,
+        164.04
+      ],
+      "pitch": 87.45,
+      "samples": 2,
+      "anchorOffset": [
+        -0.6,
+        -1.0
+      ]
+    },
+    "charcoal": {
+      "cell": "6:1.5",
+      "plate": "p3-3",
+      "bounds": [
+        404.48,
+        59.1,
+        491.93,
+        164.04
+      ],
+      "pitch": 87.45,
+      "samples": 1,
+      "anchorOffset": [
+        -1.3,
+        -0.4
+      ]
+    },
+    "red": {
+      "cell": "6:2.1",
+      "plate": "p3-3",
+      "bounds": [
+        54.68,
+        163.6,
+        142.12,
+        268.54
+      ],
+      "pitch": 87.45,
+      "samples": 1,
+      "anchorOffset": [
+        -0.7,
+        0.1
+      ]
+    },
+    "blue": {
+      "cell": "6:2.3",
+      "plate": "p3-3",
+      "bounds": [
+        229.58,
+        163.6,
+        317.03,
+        268.54
+      ],
+      "pitch": 87.45,
+      "samples": 1,
+      "anchorOffset": [
+        -0.2,
+        0.1
+      ]
+    },
+    "purple": {
+      "cell": "6:2.5",
+      "plate": "p3-3",
+      "bounds": [
+        404.48,
+        163.6,
+        491.93,
+        268.54
+      ],
+      "pitch": 87.45,
+      "samples": 3,
+      "anchorOffset": [
+        -0.1,
+        0.1
+      ]
+    },
+    "sand": {
+      "cell": "6:3.1",
+      "plate": "p3-3",
+      "bounds": [
+        54.68,
+        268.1,
+        142.12,
+        373.04
+      ],
+      "pitch": 87.45,
+      "samples": 2,
+      "anchorOffset": [
+        -0.4,
+        0.7
+      ]
+    },
+    "glass": {
+      "cell": "6:3.5",
+      "plate": "p3-3",
+      "bounds": [
+        404.48,
+        268.1,
+        491.93,
+        373.04
+      ],
+      "pitch": 87.45,
+      "samples": 1,
+      "anchorOffset": [
+        -0.6,
+        1.0
+      ]
+    },
+    "sea": {
+      "cell": "6:5.1",
+      "plate": "p3-3",
+      "bounds": [
+        54.68,
+        477.1,
+        142.12,
+        582.04
+      ],
+      "pitch": 87.45,
+      "samples": 1,
+      "anchorOffset": [
+        -0.5,
+        1.2
+      ]
+    },
+    "water": {
+      "cell": "6:5.3",
+      "plate": "p3-3",
+      "bounds": [
+        229.58,
+        477.1,
+        317.03,
+        582.04
+      ],
+      "pitch": 87.45,
+      "samples": 1,
+      "anchorOffset": [
+        -0.1,
+        1.2
+      ]
+    },
+    "salt": {
+      "cell": "6:5.5",
+      "plate": "p3-3",
+      "bounds": [
+        404.48,
+        477.1,
+        491.93,
+        582.04
+      ],
+      "pitch": 87.45,
+      "samples": 1,
+      "anchorOffset": [
+        -0.2,
+        1.2
+      ]
+    },
+    "clear": {
+      "cell": "6:6.3",
+      "plate": "p3-3",
+      "bounds": [
+        229.58,
+        581.6,
+        317.03,
+        686.54
+      ],
+      "pitch": 87.45,
+      "samples": 1,
+      "anchorOffset": [
+        -0.7,
+        1.5
+      ]
+    },
+    "poison": {
+      "cell": "11:1.3",
+      "plate": "p6-0",
+      "bounds": [
+        143.55,
+        239.93,
+        209.45,
+        319.01
+      ],
+      "pitch": 65.9,
+      "samples": 3,
+      "anchorOffset": [
+        0.2,
+        0.0
+      ]
+    },
+    "scorpion": {
+      "cell": "11:4.1",
+      "plate": "p6-0",
+      "bounds": [
+        11.75,
+        475.13,
+        77.65,
+        554.21
+      ],
+      "pitch": 65.9,
+      "samples": 2,
+      "anchorOffset": [
+        0.4,
+        -0.5
+      ]
+    },
+    "hole": {
+      "cell": "12T:1.2",
+      "plate": "p7-0",
+      "bounds": [
+        219.8,
+        54.04,
+        262.4,
+        105.16
+      ],
+      "pitch": 42.6,
+      "samples": 7,
+      "anchorOffset": [
+        -0.3,
+        -6.0
+      ]
+    },
+    "god": {
+      "cell": "4T:1.1",
+      "plate": "p7-1",
+      "bounds": [
+        194.5,
+        22.44,
+        261.3,
+        102.6
+      ],
+      "pitch": 66.8,
+      "samples": 6,
+      "anchorOffset": [
+        -0.3,
+        0.1
+      ]
+    },
+    "sun": {
+      "cell": "14:4.3",
+      "plate": "p3-0",
+      "bounds": [
+        614.15,
+        268.17,
+        671.05,
+        336.45
+      ],
+      "pitch": 56.9,
+      "samples": 1,
+      "anchorOffset": [
+        -0.4,
+        1.2
+      ]
+    },
+    "moon": {
+      "cell": "12:2.2",
+      "plate": "p7-0",
+      "bounds": [
+        99.67,
+        176.1,
+        129.82,
+        212.28
+      ],
+      "pitch": 30.15,
+      "samples": 2,
+      "anchorOffset": [
+        1.8,
+        2.5
+      ]
+    },
+    "daylight": {
+      "cell": "12:5.1",
+      "plate": "p7-0",
+      "bounds": [
+        69.52,
+        282.84,
+        99.67,
+        319.02
+      ],
+      "pitch": 30.15,
+      "samples": 1,
+      "anchorOffset": [
+        -0.1,
+        6.4
+      ]
+    },
+    "night": {
+      "cell": "12:5.3",
+      "plate": "p7-0",
+      "bounds": [
+        129.82,
+        282.84,
+        159.97,
+        319.02
+      ],
+      "pitch": 30.15,
+      "samples": 1,
+      "anchorOffset": [
+        5.7,
+        6.4
+      ]
+    },
+    "hour": {
+      "cell": "14:1.2",
+      "plate": "p3-0",
+      "bounds": [
+        557.25,
+        67.47,
+        614.15,
+        135.75
+      ],
+      "pitch": 56.9,
+      "samples": 2,
+      "anchorOffset": [
+        0.1,
+        1.9
+      ]
+    },
+    "minute": {
+      "cell": "14:1.6",
+      "plate": "p3-0",
+      "bounds": [
+        784.85,
+        67.47,
+        841.75,
+        135.75
+      ],
+      "pitch": 56.9,
+      "samples": 1,
+      "anchorOffset": [
+        6.4,
+        2.9
+      ]
+    },
+    "earth": {
+      "cell": "14:3.1",
+      "plate": "p3-0",
+      "bounds": [
+        500.35,
+        201.27,
+        557.25,
+        269.55
+      ],
+      "pitch": 56.9,
+      "samples": 2,
+      "anchorOffset": [
+        -2.1,
+        1.0
+      ]
+    },
+    "eat": {
+      "cell": "11:2.2",
+      "plate": "p6-0",
+      "bounds": [
+        77.65,
+        318.33,
+        143.55,
+        397.41
+      ],
+      "pitch": 65.9,
+      "samples": 5,
+      "anchorOffset": [
+        0.4,
+        0.3
+      ]
+    },
+    "sound": {
+      "cell": "3L:1.3",
+      "plate": "p0-0",
+      "bounds": [
+        192.0,
+        69.82,
+        244.0,
+        132.22
+      ],
+      "pitch": 52,
+      "samples": 5,
+      "anchorOffset": [
+        -2.3,
+        -1.2
+      ]
+    },
+    "make": {
+      "cell": "3L:8.2",
+      "plate": "p0-0",
+      "bounds": [
+        140.0,
+        503.82,
+        192.0,
+        566.22
+      ],
+      "pitch": 52,
+      "samples": 2,
+      "anchorOffset": [
+        -1.4,
+        -1.1
+      ]
+    },
+    "have": {
+      "cell": "11:1.2",
+      "plate": "p6-0",
+      "bounds": [
+        77.65,
+        239.93,
+        143.55,
+        319.01
+      ],
+      "pitch": 65.9,
+      "samples": 6,
+      "anchorOffset": [
+        0.1,
+        0.5
+      ]
+    },
+    "become": {
+      "cell": "3R:8.2",
+      "plate": "p0-0",
+      "bounds": [
+        1314.0,
+        750.82,
+        1366.0,
+        813.22
+      ],
+      "pitch": 52,
+      "samples": 1,
+      "anchorOffset": [
+        -0.7,
+        -2.1
+      ]
+    },
+    "cannot-negation": {
+      "cell": "3L:3.3",
+      "plate": "p0-0",
+      "bounds": [
+        192.0,
+        193.82,
+        244.0,
+        256.22
+      ],
+      "pitch": 52,
+      "samples": 4,
+      "anchorOffset": [
+        -2.0,
+        -1.0
+      ]
+    },
+    "see": {
+      "cell": "5:1.2",
+      "plate": "p4-0",
+      "bounds": [
+        466.8,
+        62.82,
+        521.6,
+        128.58
+      ],
+      "pitch": 54.8,
+      "samples": 2,
+      "anchorOffset": [
+        -1.2,
+        1.3
+      ]
+    },
+    "pass": {
+      "cell": "4:5.9",
+      "plate": "p7-1",
+      "bounds": [
+        369.48,
+        328.76,
+        411.53,
+        379.22
+      ],
+      "pitch": 42.05,
+      "samples": 3,
+      "anchorOffset": [
+        -1.4,
+        -2.1
+      ]
+    },
+    "subtract": {
+      "cell": "6:4.3",
+      "plate": "p3-3",
+      "bounds": [
+        229.58,
+        372.6,
+        317.03,
+        477.54
+      ],
+      "pitch": 87.45,
+      "samples": 2,
+      "anchorOffset": [
+        -0.6,
+        0.1
+      ]
+    },
+    "turn": {
+      "cell": "14:3.2",
+      "plate": "p3-0",
+      "bounds": [
+        557.25,
+        201.27,
+        614.15,
+        269.55
+      ],
+      "pitch": 56.9,
+      "samples": 2,
+      "anchorOffset": [
+        0.1,
+        1.4
+      ]
+    },
+    "hear": {
+      "cell": "15R:2.5",
+      "plate": "p1-0",
+      "bounds": [
+        708.31,
+        106.35,
+        750.17,
+        156.58
+      ],
+      "pitch": 41.86,
+      "samples": 1,
+      "anchorOffset": [
+        2.0,
+        -1.4
+      ]
+    },
+    "small": {
+      "cell": "3R:8.3",
+      "plate": "p0-0",
+      "bounds": [
+        1366.0,
+        750.82,
+        1418.0,
+        813.22
+      ],
+      "pitch": 52,
+      "samples": 1,
+      "anchorOffset": [
+        -1.1,
+        -3.3
+      ]
+    },
+    "below": {
+      "cell": "5:2.4",
+      "plate": "p4-0",
+      "bounds": [
+        576.4,
+        128.02,
+        631.2,
+        193.78
+      ],
+      "pitch": 54.8,
+      "samples": 2,
+      "anchorOffset": [
+        -0.7,
+        -1.4
+      ]
+    },
+    "end": {
+      "cell": "1:2.4",
+      "plate": "p4-1",
+      "bounds": [
+        478.85,
+        428.7,
+        523.95,
+        482.82
+      ],
+      "pitch": 45.1,
+      "samples": 2,
+      "anchorOffset": [
+        -2.1,
+        -1.8
+      ]
+    },
+    "horizontal": {
+      "cell": "4:2.2",
+      "plate": "p7-1",
+      "bounds": [
+        75.12,
+        179.36,
+        117.17,
+        229.82
+      ],
+      "pitch": 42.05,
+      "samples": 1,
+      "anchorOffset": [
+        -2.3,
+        0.4
+      ]
+    },
+    "vertical": {
+      "cell": "4:3.1",
+      "plate": "p7-1",
+      "bounds": [
+        33.08,
+        229.16,
+        75.12,
+        279.62
+      ],
+      "pitch": 42.05,
+      "samples": 1,
+      "anchorOffset": [
+        0.5,
+        -1.0
+      ]
+    },
+    "diagonal": {
+      "cell": "4:4.1",
+      "plate": "p7-1",
+      "bounds": [
+        33.08,
+        278.96,
+        75.12,
+        329.42
+      ],
+      "pitch": 42.05,
+      "samples": 1,
+      "anchorOffset": [
+        -2.7,
+        -1.6
+      ]
+    },
+    "large": {
+      "cell": "9:1.5",
+      "plate": "p5-0",
+      "bounds": [
+        555.3,
+        490.58,
+        599.1,
+        543.14
+      ],
+      "pitch": 43.8,
+      "samples": 2,
+      "anchorOffset": [
+        0.0,
+        -1.5
+      ]
+    },
+    "black": {
+      "cell": "13L:1.1",
+      "plate": "p6-1",
+      "bounds": [
+        30.4,
+        42.08,
+        77.0,
+        98.0
+      ],
+      "pitch": 46.6,
+      "samples": 5,
+      "anchorOffset": [
+        -1.5,
+        2.5
+      ]
+    },
+    "on": {
+      "cell": "1:1.4",
+      "plate": "p4-1",
+      "bounds": [
+        478.85,
+        375.2,
+        523.95,
+        429.32
+      ],
+      "pitch": 45.1,
+      "samples": 2,
+      "anchorOffset": [
+        -2.4,
+        -0.3
+      ]
+    },
+    "left": {
+      "cell": "15R:2.1",
+      "plate": "p1-0",
+      "bounds": [
+        540.87,
+        106.35,
+        582.73,
+        156.58
+      ],
+      "pitch": 41.86,
+      "samples": 1,
+      "anchorOffset": [
+        -0.3,
+        0.8
+      ]
+    },
+    "right": {
+      "cell": "15R:2.3",
+      "plate": "p1-0",
+      "bounds": [
+        624.59,
+        106.35,
+        666.45,
+        156.58
+      ],
+      "pitch": 41.86,
+      "samples": 1,
+      "anchorOffset": [
+        -0.0,
+        0.7
+      ]
+    },
+    "with-spear": {
+      "cell": "9:1.7",
+      "plate": "p5-0",
+      "bounds": [
+        642.9,
+        490.58,
+        686.7,
+        543.14
+      ],
+      "pitch": 43.8,
+      "samples": 1,
+      "anchorOffset": [
+        -0.4,
+        -1.2
+      ]
+    }
+  },
+  "webNounMark": {
+    "center": [80, 34.5],
+    "inkWidth": 76,
+    "inkHeight": 15,
+    "radius": 7.5,
+    "widthFractionOfCell": 0.475
+  },
+  "webAccents": {
+    "advance": 160,
+    "nounInkWidth": 126,
+    "verbDiameter": 29,
+    "slashCenter": [
+      80,
+      33
+    ],
+    "slashAxisDegrees": {
+      "adjective": -24,
+      "adverb": 24
+    },
+    "slashCenterline": 20,
+    "slashStroke": 8.5,
+    "inkLengthAlongAxis": 28.5,
+    "inkBounds": [
+      26.77,
+      16.63
+    ]
+  }
+}

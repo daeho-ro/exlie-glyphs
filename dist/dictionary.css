@@ -1,0 +1,246 @@
+#dictionary-title {
+  margin: 4px 0 12px;
+}
+
+.dict-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid var(--rule);
+  border-radius: 7px;
+  background: var(--card);
+  color: var(--soft);
+}
+
+.dict-search:focus-within {
+  border-color: #a17d54;
+  box-shadow: 0 0 0 2px #bb97652a;
+}
+
+.dict-search #query {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 5px 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 16px;
+}
+
+#dx-results .word-class {
+  margin-top: 21px;
+}
+
+.word-class > h2 {
+  margin: 0 0 7px;
+  color: #4b473c;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.entries-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 138px), 1fr));
+  gap: 5px;
+}
+
+.entry-tile {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 54px;
+  padding: 6px 8px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  text-align: start;
+}
+
+.entry-tile:hover,
+.word-detail button.form-row:hover {
+  border-color: #b19a79;
+  background: #f5eedf;
+}
+
+.entry-tile,
+.word-detail button.form-row {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.entry-tile:active,
+.word-detail button.form-row:active {
+  background: #eae0cc;
+}
+
+.entry-ink,
+.detail-ink,
+.root-ink,
+.form-ink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #343b30;
+  line-height: 1;
+}
+
+.entry-ink {
+  min-width: 1em;
+  font-size: 1.95rem;
+}
+
+.entry-name,
+.form-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 630;
+  line-height: 1.3;
+}
+
+.entry-name {
+  font-size: .93rem;
+}
+
+.word-detail {
+  min-width: 0;
+}
+
+.detail-word,
+.root-word {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 13px;
+}
+
+.detail-word {
+  margin-bottom: 16px;
+}
+
+.detail-ink {
+  min-width: 1.25em;
+  min-height: 1.2em;
+  font-size: 3.1rem;
+}
+
+.detail-word strong {
+  font: 650 1rem/1.35 var(--ui);
+  overflow-wrap: anywhere;
+}
+
+.detail-word p,
+.root-word small,
+.form-pos {
+  color: var(--soft);
+  font-size: .84rem;
+  line-height: 1.4;
+}
+
+.detail-word p {
+  margin-top: 3px;
+}
+
+.root-word {
+  padding: 10px 12px;
+  border: 1px solid #dbd3bf;
+  border-radius: 6px;
+  background: #f3eee1;
+}
+
+.root-ink {
+  min-width: 1.25em;
+  font-size: 2.4rem;
+}
+
+.root-word small,
+.root-word strong {
+  display: block;
+}
+
+.root-word strong {
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.root-word > div:only-child {
+  grid-column: 1 / -1;
+}
+
+.word-detail h3 {
+  margin: 16px 0 6px;
+  font-size: .97rem;
+}
+
+.form-list,
+.component-list {
+  display: grid;
+  padding: 0;
+  margin: 3px 0 0;
+  list-style: none;
+}
+
+.word-detail .form-row {
+  display: grid;
+  grid-template-columns: 2.45rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 4px 3px;
+  border-bottom: 1px solid var(--rule);
+  text-align: start;
+}
+
+.word-detail button.form-row .form-name {
+  color: var(--brick);
+  text-decoration: underline;
+  text-underline-offset: .18em;
+}
+
+.word-detail button.form-row:focus-visible {
+  outline-offset: -2px;
+}
+
+.form-ink {
+  min-width: 0;
+  font-size: 1.95rem;
+}
+
+.form-name {
+  font-size: .95rem;
+}
+
+.form-pos {
+  text-align: end;
+}
+
+.word-detail .detail-actions {
+  display: grid;
+  gap: 7px;
+  margin-top: 15px;
+}
+
+.detail-actions .action {
+  width: 100%;
+  min-height: 44px;
+}
+
+#dx-results .empty-result {
+  margin: 16px 0;
+  color: var(--soft);
+}
+
+/* Compound spellings keep all of their signs in order in a narrow tile. */
+.entry-ink.compound {
+  font-size: 1.15rem;
+  white-space: nowrap;
+}
+.detail-ink.compound {
+  font-size: 1.95rem;
+  white-space: nowrap;
+}

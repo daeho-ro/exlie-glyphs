@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#f7f5ef" />
+    <meta
+      name="description"
+      content="기호를 골라 나만의 유배지 문자열을 이미지로 저장하세요. 문자판 링크를 열면 같은 기호를 보고 풀이를 펼칠 수 있습니다."
+    />
+    <title>Exile Glyphs · 유배지 문자열 생성기</title>
+    <link rel="icon" type="image/svg+xml" href="assets/divine-trial.svg" />
+    <link rel="stylesheet" href="assets/font.css" />
+    <link rel="stylesheet" href="assets/pretendard/pretendard.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="dictionary.css" />
+    <link rel="stylesheet" href="ocr-ui.css" />
+    <script defer src="assets/glyph-map.js"></script>
+    <script defer src="assets/glyph-codes.js"></script>
+    <script defer src="catalog.js"></script>
+    <script defer src="examples.js"></script>
+    <script defer src="engine.js"></script>
+    <script defer src="dictionary.js"></script>
+    <script defer src="share.js"></script>
+    <script defer src="ocr.js"></script>
+    <script defer src="ocr-clipboard.js"></script>
+    <script defer src="ocr-ui.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <header class="mast">
+      <div class="mast-inner">
+        <a class="brand" href="./" id="brand"
+          ><img src="assets/divine-trial.svg" width="37" height="37" alt="" />Exile
+          <i>Glyphs</i></a
+        >
+        <nav id="nav"></nav>
+        <div class="global">
+          <button id="help" class="help-icon" aria-label="사용 안내"></button
+          ><label class="select-box global-select"
+            ><span id="globe"></span
+            ><select id="locale" aria-label="화면 언어 / Interface language">
+              <option value="ko">한국어</option>
+              <option value="en">English</option>
+              <option value="ja">日本語</option>
+            </select></label
+          >
+        </div>
+      </div>
+    </header>
+    <main id="app" tabindex="-1"></main>
+    <footer>
+      <div>
+        <span class="footer-word">Exile Glyphs</span><span id="fan"></span>
+      </div>
+      <div class="footer-links">
+        <button id="source"></button>
+        <a href="https://github.com/daeho-ro/exlie-glyphs" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </footer>
+    <dialog id="dialog" aria-labelledby="dialog-title">
+      <div class="dialog-top">
+        <h2 id="dialog-title"></h2>
+        <button id="close" class="square" aria-label="닫기"></button>
+      </div>
+      <div id="dialog-body"></div>
+    </dialog>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <noscript>Exile Glyphs requires JavaScript.</noscript>
+  </body>
+</html>

@@ -1,0 +1,156 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Exile glyph OCR regression</title>
+<link rel="stylesheet" href="../dist/assets/font.css">
+<script src="../dist/assets/glyph-map.js"></script>
+<script src="../dist/catalog.js"></script>
+<script src="../dist/engine.js"></script>
+<script src="../dist/ocr.js"></script>
+<script src="../dist/share.js"></script>
+<output id="status" aria-live="polite">Running</output>
+<script>
+(async () => {
+  const expected = ["bird","eat","spider","four","snake"];
+  const ink = expected.map(id => ExileEngine.tokens.find(token => token.id === id).glyph);
+  await document.fonts.load("90px ExileGlyphs", ink.join(""));
+  const image = document.createElement("canvas");
+  image.width = 550;
+  image.height = 400;
+  const ctx = image.getContext("2d");
+  const dx = Math.cos(-0.48), dy = Math.sin(-0.48), start = {x:35,y:325};
+  const background = ctx.createLinearGradient(0,0,550,400);
+  background.addColorStop(0,"#a0a4ab");
+  background.addColorStop(1,"#faf8ef");
+  ctx.fillStyle = background;
+  ctx.fillRect(0,0,550,400);
+  ctx.translate(start.x,start.y);
+  ctx.rotate(-0.48);
+  ctx.font = "90px ExileGlyphs";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#403f41";
+  ink.forEach((glyph,i) => ctx.fillText(glyph,46+i*96,32));
+  // Nearby marks on each side of the rotated region are outside its bounds.
+  ctx.fillText(ink[3], -60, 32);
+  ctx.fillText(ink[2], 542, 32);
+  ctx.fillText(ink[1], 202, -90);
+  ctx.fillText(ink[4], 324, 150);
+  const end = {x:start.x+480*dx,y:start.y+480*dy};
+  const output = await ExileOCR.recognize(image,{start,end,height:112,count:expected.length});
+  const actual = output.cells.map(cell => cell.candidates[0]?.id);
+  if (actual.join("|") !== expected.join("|")) throw new Error("Unexpected result: " + actual.join(" "));
+  const checked = [actual.length];
+  // Independent pencil paths. No glyph font or photograph is used to draw this line.
+  const handwriting = document.createElement("canvas");
+  handwriting.width = 220;
+  handwriting.height = 100;
+  const pen = handwriting.getContext("2d");
+  pen.fillStyle = "#e9e5dc";
+  pen.fillRect(0,0,220,100);
+  pen.strokeStyle = "#48413e";
+  pen.lineWidth = 3;
+  pen.lineCap = "round";
+  pen.lineJoin = "round";
+  function stroke(path) { pen.stroke(new Path2D(path)); }
+  stroke("M38 27 L55 18");
+  stroke("M52 35 L78 57 L51 84 L23 58 Z");
+  stroke("M25 58 L76 57");
+  pen.lineWidth = 1.8;
+  stroke("M34 54 L49 41 M43 55 L55 43 M52 55 L61 47 M59 55 L67 50");
+  pen.lineWidth = 3;
+  stroke("M149 29 L163 17");
+  stroke("M139 84 L159 38 L179 82");
+  stroke("M137 59 L181 58");
+  const sketched = await ExileOCR.recognize(handwriting,{
+    start:{x:0,y:50},end:{x:220,y:50},height:100,
+  });
+  const sketchIds = sketched.cells.map(cell=>cell.candidates[0]?.id);
+  if(sketchIds.join("|")!=="upper|dead") throw new Error("Pencil line mismatch: "+sketchIds.join(" "));
+  for (const [count,pitch,height,fontSize,baseline,light,forced] of [
+    [24,208,250,179,200,false,false],
+    // The right image edge falls between output pixels when this strip is rectified.
+    [72,97,108,84,87,true,true],
+  ]) {
+    const line = document.createElement("canvas");
+    line.width = count*pitch;
+    line.height = height;
+    const draw = line.getContext("2d");
+    draw.fillStyle = light ? "#1c241f" : "white";
+    draw.fillRect(0,0,line.width,line.height);
+    draw.font = fontSize + "px ExileGlyphs";
+    draw.textAlign = "center";
+    draw.fillStyle = light ? "#f6f0d9" : "black";
+    const ids = Array.from({length:count},(_,i)=>expected[i%expected.length]);
+    ids.forEach((id,i)=>draw.fillText(ExileEngine.tokens.find(t=>t.id===id).glyph,(i+.5)*pitch,baseline));
+    const opts = {start:{x:0,y:line.height/2},end:{x:line.width,y:line.height/2},height:line.height};
+    const long = await ExileOCR.recognize(line,forced ? {...opts,count} : opts);
+    const got = long.cells.map(cell=>cell.candidates[0]?.id);
+    if(got.length!==count || got.some((id,i)=>id!==ids[i])) throw new Error("Long line mismatch "+count+" "+got.join(" "));
+    checked.push(count);
+    try {
+      await ExileOCR.recognize(line,{...opts,count:line.width+1});
+      throw new Error("An impossible pixel count was accepted");
+    } catch (error) { if(error.code!=="pixel-count") throw error; }
+  }
+  // A download includes headings, rules and localized labels around the inscription.
+  // Use the actual exporter so these fixtures follow changes to the published card.
+  const exported = [
+    ["ko", ["spider", "see", "snake"]],
+    ["en", ["bird", "eat", "spider"]],
+    ["ja", ["cow", "eat", "grass"]],
+  ];
+  for (const [language, ids] of exported) {
+    const image = await createImageBitmap(await ExileShare.png(ids, language));
+    try {
+      const selected = await ExileOCR.suggestLine(image);
+      const read = await ExileOCR.recognize(image, selected);
+      const actual = read.cells.map(cell => cell.candidates[0]?.id);
+      if (JSON.stringify(actual) !== JSON.stringify(ids)) {
+        throw new Error("Wrong line or glyphs on " + language + " card: " + actual.join(", "));
+      }
+    } finally {
+      image.close();
+    }
+  }
+
+  // Every expected slot is known, including two invisible edge slots. Ink outside
+  // this exact strip must not be pulled in to fill them.
+  const clockIds = ["zero", "one", "hour", "equal", "six", "zero", "minute", "zero"];
+  const pitch = 96, left = 30, centerY = 160, lineHeight = 108;
+  const clock = document.createElement("canvas");
+  clock.width = left * 2 + clockIds.length * pitch;
+  clock.height = 325;
+  const clockPen = clock.getContext("2d");
+  const stone = clockPen.createLinearGradient(0, 0, clock.width, clock.height);
+  stone.addColorStop(0, "#454b42"); stone.addColorStop(1, "#1d211e");
+  clockPen.fillStyle = stone;
+  clockPen.fillRect(0, 0, clock.width, clock.height);
+  clockPen.font = "bold 22px sans-serif"; clockPen.fillStyle = "#f5e7c9";
+  clockPen.fillText("EXILE GLYPHS    유배지    流刑地", 22, 35);
+  clockPen.fillRect(22, 54, clock.width - 44, 2);
+  clockPen.font = "78px ExileGlyphs"; clockPen.textAlign = "center";
+  const byId = ExileReading.byId;
+  clockIds.forEach((id, i) => {
+    clockPen.fillText(byId.get(id).glyph, left + (i + .5) * pitch, centerY + 30);
+  });
+  // A neighbouring row of high-contrast symbols is deliberately outside the band.
+  clockIds.forEach((_, i) => {
+    clockPen.fillText(byId.get("snake").glyph, left + (i + .5) * pitch, 307);
+  });
+  const bounds = {
+    start: {x:left, y:centerY}, end: {x:left + pitch * clockIds.length, y:centerY},
+    height: lineHeight, count:clockIds.length,
+  };
+  const clockResult = await ExileOCR.recognize(clock, bounds);
+  const clockActual = clockResult.cells.map(cell => cell.candidates[0]?.id);
+  if (JSON.stringify(clockActual) !== JSON.stringify(clockIds)) {
+    throw new Error("Clock, endpoints or blank slots changed: " + clockActual.join(", "));
+  }
+  const empty = await ExileOCR.recognize(clock, {
+    start:{x:left, y:79}, end:{x:clock.width - left, y:79}, height:20, count:4,
+  });
+  if (empty.cells.length) throw new Error("An empty band near artwork produced glyphs.");
+
+  document.getElementById("status").textContent = "PASS printed rows (" + checked.join(", ")
+    + "), two pencil sketches, three localized cards, blank slots and an empty selection.";
+})().catch(error => {document.getElementById("status").textContent = "FAIL " + error.message;});
+</script>
