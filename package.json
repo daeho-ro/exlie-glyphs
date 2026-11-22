@@ -5,16 +5,20 @@
   "type": "module",
   "engines": { "node": ">=22" },
   "scripts": {
-    "prepare:reader": "node scripts/prepare-reader.mjs",
+    "prepare:reader": "node scripts/prepare-reader.mjs && node scripts/build-card-art.mjs",
     "predev": "npm run prepare:reader",
     "dev": "next dev",
     "prebuild": "npm run prepare:reader",
     "build": "next build",
+    "pretest": "node scripts/build-card-art.mjs",
     "test": "node --test tests/*.test.cjs"
   },
   "dependencies": {
     "next": "^16.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@resvg/resvg-wasm": "2.6.2"
   }
 }

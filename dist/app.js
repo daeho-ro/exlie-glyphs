@@ -157,11 +157,18 @@
       localStorage.setItem(key, value);
     } catch {}
   };
-  const chooseLang = (value) => (reader.languages.includes(value) ? value : 'ko');
-  const savedLocale = saved('exile-ui');
-  let hasLocalePreference = reader.languages.includes(savedLocale);
+  function preferredLocale() {
+    const savedLocale = saved('exile-ui');
+    if (reader.languages.includes(savedLocale)) return savedLocale;
+    const preferences = navigator.languages?.length ? navigator.languages : [navigator.language];
+    for (const tag of preferences) {
+      const lang = tag?.split('-')[0].toLowerCase();
+      if (reader.languages.includes(lang)) return lang;
+    }
+    return 'en';
+  }
   const state = {
-    loc: hasLocalePreference ? savedLocale : chooseLang(navigator.language.split('-')[0]),
+    loc: preferredLocale(),
     page: 'desk',
     ids: [],
     selected: null,
@@ -314,7 +321,10 @@
         toast(tr('shareFileHint'));
         return;
       }
-      const url = share.createBoardLink(state.ids, state.loc);
+      // A standalone static reader can reopen its own fragment without a Pages Function.
+      const url = document.querySelector('meta[property="og:image"]')
+        ? share.createBoardLink(state.ids, state.loc)
+        : new URL(share.boardHash(state.ids, state.loc), location.href).href;
       if (navigator.share) {
         try {
           await navigator.share({ title: 'Exile Glyphs', url });
@@ -335,47 +345,48 @@
       toast(tr('shareFailed'));
     }
   }
-  let activeHash;
-  function syncBoardHash() {
-    const canonical = share.boardHash(state.ids, state.loc);
-    if (location.hash !== canonical) {
-      activeHash = canonical;
-      location.replace(canonical);
-    }
+  let activeLocation;
+  let receivedLocation;
+  const currentLocation = () => location.pathname + location.search + location.hash;
+  function shareRoute() {
+    return /^\/s\/([^/]+)\/?$/.exec(location.pathname)?.[1];
   }
   function openPage(page) {
     if (state.page === page) return;
-    const hash = page === 'dict' ? '#dict' : state.shared ? share.boardHash(state.ids, state.loc) : '';
-    activeHash = hash;
-    if (location.hash !== hash) location.hash = hash;
+    const base = shareRoute() ? '/' : location.pathname + location.search;
+    const target = page === 'dict' ? base + '#dict' : receivedLocation || base;
+    if (location.protocol === 'file:') {
+      location.hash = new URL(target, location.href).hash;
+    } else {
+      history.pushState(history.state, '', target);
+    }
+    activeLocation = currentLocation();
     state.page = page;
     render();
     window.scrollTo(0, 0);
   }
-  function loadHash() {
-    if (activeHash === location.hash) return;
-    activeHash = location.hash;
+  function loadLocation() {
+    const route = currentLocation();
+    if (activeLocation === route) return;
+    activeLocation = route;
+    const key = shareRoute();
     const fromDictionary = state.page === 'dict';
-    state.page = activeHash === '#dict' ? 'dict' : 'desk';
-    if (activeHash.startsWith('#b=')) {
-      const board = share.readBoardLink(activeHash);
-      const continuing = board && fromDictionary && state.shared &&
-        activeHash === share.boardHash(state.ids, board.lang);
-      if (!continuing) {
+    state.page = !key && location.hash === '#dict' ? 'dict' : 'desk';
+    if (key || location.hash.startsWith('#b=')) {
+      // A dictionary round trip keeps the original link, revealed reading and selected sign.
+      if (!(fromDictionary && route === receivedLocation)) {
+        const board = share.readBoardAt(key, location.hash);
         state.ids = board?.ids || [];
         state.selected = null;
         state.history = [];
         state.shared = Boolean(board);
         state.revealed = !board;
+        receivedLocation = board ? route : undefined;
+        if (!board) toast(tr('invalid'));
       }
-      if (board) {
-        if (!hasLocalePreference) state.loc = chooseLang(board.lang);
-        syncBoardHash();
-      } else {
-        toast(tr('invalid'));
-      }
-    } else if (state.page === 'desk' && state.shared) {
+    } else if (state.page === 'desk') {
       state.shared = false;
+      receivedLocation = undefined;
     }
     render();
   }
@@ -386,11 +397,13 @@
     if (!Array.isArray(ids) || ids.some((id) => !reader.byId.has(id))) return;
     state.history.push({ ids: state.ids.slice(), selected: state.selected, singleAppend });
     if (state.history.length > 30) state.history.shift();
-    if (state.shared || location.hash.startsWith('#b=')) {
-      activeHash = '';
-      location.replace('#');
+    if (shareRoute() || state.shared || location.hash.startsWith('#b=')) {
+      if (shareRoute()) history.replaceState(history.state, '', '/');
+      else location.replace('#');
+      activeLocation = currentLocation();
     }
     state.shared = false;
+    receivedLocation = undefined;
     state.ids = ids.slice();
     state.selected = selected;
     refreshBoard();
@@ -496,10 +509,9 @@
   document.addEventListener('change', (e) => {
     const el = e.target;
     if (el.id === 'locale') {
-      state.loc = chooseLang(el.value);
-      hasLocalePreference = true;
+      if (!reader.languages.includes(el.value)) return;
+      state.loc = el.value;
       save('exile-ui', state.loc);
-      if (state.shared && state.page === 'desk') syncBoardHash();
       render();
     }
     if (el.id === 'example' && el.value !== '') {
@@ -551,8 +563,9 @@
         dialog.close();
     }
   });
-  window.addEventListener('hashchange', loadHash);
-  loadHash();
+  window.addEventListener('popstate', loadLocation);
+  window.addEventListener('hashchange', loadLocation);
+  loadLocation();
   document.fonts
     .load('36px ExileGlyphs', reader.byId.get('bird').glyph)
     .then((f) => {

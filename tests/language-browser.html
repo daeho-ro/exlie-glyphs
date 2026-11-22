@@ -1,0 +1,159 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Reader language and shared-board navigation tests</title>
+<pre id="result">Running…</pre>
+<script type="module">
+// Serve the repository root over HTTP and open tests/language-browser.html.
+if (!location.search) {
+  const result = document.getElementById('result');
+  try {
+    await run();
+    result.textContent = 'PASS';
+  } catch (error) {
+    result.textContent = 'FAIL\n' + error.stack;
+    console.error(error);
+  }
+}
+async function run() {
+  const entry = new URL('../dist/index.html', location.href);
+  const shell = new DOMParser().parseFromString(await (await fetch(entry)).text(), 'text/html');
+  const fixture = new URL('?frame', location.href);
+  let frame;
+  function equal(actual, expected, detail) {
+    if (actual !== expected) throw Error(detail + ': ' + String(actual).slice(0, 160) + ' ≠ ' + String(expected).slice(0, 160));
+  }
+  async function boot({path = '/', languages, language, saved, hosted = true}) {
+    frame?.remove();
+    frame = document.createElement('iframe');
+    frame.src = fixture;
+    const ready = new Promise(resolve => frame.onload = resolve);
+    document.body.append(frame);
+    await ready;
+    const w = frame.contentWindow, d = w.document;
+    const storage = new Map(saved ? [['exile-ui', saved]] : []);
+    Object.defineProperty(w, 'localStorage', {value:{
+      getItem: key => storage.get(key) ?? null,
+      setItem: (key, value) => storage.set(key, value),
+    }});
+    Object.defineProperties(w.navigator, {
+      language:{value:language}, languages:{value:languages},
+    });
+    w.history.replaceState(null, '', path);
+    d.body.innerHTML = shell.body.innerHTML;
+    const base = d.createElement('base');
+    base.href = entry.href;
+    d.head.append(base);
+    if (hosted) {
+      const og = d.createElement('meta');
+      og.setAttribute('property', 'og:image');
+      d.head.append(og);
+    }
+    for (const item of shell.querySelectorAll('script[src]')) {
+      await new Promise((resolve, reject) => {
+        const script = d.createElement('script');
+        script.src = new URL(item.getAttribute('src'), entry);
+        script.onload = resolve;
+        script.onerror = reject;
+        d.head.append(script);
+      });
+    }
+    return {w, d, storage};
+  }
+  for (const [saved, languages, language, expected] of [
+    ['ko', ['ja-JP'], 'ja-JP', 'ko'],
+    ['xx', ['zh-Hant', 'ja-JP', 'en-GB'], 'ko-KR', 'ja'],
+    [null, ['fr', 'en-GB', 'ja'], 'ko', 'en'],
+    [null, ['KO-kr', 'en'], 'en', 'ko'],
+    [null, ['de', 'fr'], 'ko', 'en'],
+    [null, [], 'ja-JP', 'ja'],
+    [null, undefined, 'ko-KR', 'ko'],
+    [null, undefined, undefined, 'en'],
+  ]) {
+    const {d, storage} = await boot({saved, languages, language});
+    equal(d.documentElement.lang, expected, 'Negotiated display language');
+    equal(d.querySelector('#locale').value, expected, 'Selected language control');
+    equal(storage.get('exile-ui'), saved ?? undefined, 'Automatic detection did not save a preference');
+  }
+
+  const source = await boot({languages:['en']});
+  const codec = source.w.ExileShare;
+  const short = ['zero', 'bird', 'bird', 'zero'];
+  const long = Array.from({length:2049}, (_, i) => short[i % short.length]);
+  const originals = [
+    {path:codec.createBoardLink(short, 'ko') + '?via=test', ids:short, hosted:true},
+    {path:codec.createBoardLink(long, 'ko'), ids:long, hosted:true},
+    {path:'/standalone/index.html?via=test' + codec.boardHash(short, 'ko'), ids:short, hosted:false},
+    {path:'/#b=2.QB00NBBDNBBDQB00.ko&s=00000000-0000-4000-8000-000000000001', ids:short, hosted:true},
+  ];
+  for (const {path, ids, hosted} of originals) {
+    const {w,d,storage} = await boot({path, hosted, languages:['fr','ja-JP']});
+    const original = new URL(path, location.origin).href;
+    const click = selector => d.querySelector(selector).click();
+    const switchTo = lang => {
+      const select = d.querySelector('#locale');
+      select.value = lang;
+      select.dispatchEvent(new w.Event('change', {bubbles:true}));
+    };
+    const board = () => d.querySelector('#board');
+    const assertReturningBoard = () => {
+      equal(w.location.href, original, 'Exact incoming URL');
+      equal(d.querySelectorAll('.board-slot').length, ids.length, 'Full board');
+      equal(board().dataset.revealed, 'true', 'Revealed reading');
+      equal(d.querySelector('[data-slot="1"]').getAttribute('aria-pressed'), 'true', 'Selected sign');
+      equal(d.documentElement.lang, 'en', 'Reader language after navigation');
+    };
+    equal(w.location.href, original, 'Opening did not rewrite incoming link');
+    equal(d.documentElement.lang, 'ja', 'Recipient preference over sender language');
+    equal(board().dataset.revealed, 'false', 'Incoming reading starts hidden');
+    equal(d.querySelectorAll('.board-slot').length, ids.length, 'Incoming sign count');
+    click('[data-act=reveal]');
+    click('[data-slot="1"]');
+    switchTo('ko');
+    equal(w.location.href, original, 'Language change leaves incoming link intact');
+    click('[data-page=dict]');
+    switchTo('en');
+    equal(storage.get('exile-ui'), 'en', 'Explicit choice saved');
+    const travel = async direction => {
+      const event = new Promise(resolve => w.addEventListener('popstate', resolve, {once:true}));
+      w.history[direction]();
+      await event;
+    };
+    await travel('back');
+    assertReturningBoard();
+    await travel('forward');
+    equal(d.querySelector('[data-page=dict]').getAttribute('aria-current'), 'page', 'Forward to dictionary');
+    click('[data-page=desk]');
+    assertReturningBoard();
+
+    let sent, card;
+    Object.defineProperty(w.navigator, 'share', {value: async ({url}) => {sent = new URL(url);}});
+    w.ExileShare.png = async (words, lang) => {card = {words, lang}; return new Blob();};
+    w.ExileShare.download = () => {};
+    click('[data-act=export]');
+    click('[data-act=share]');
+    const key = sent.pathname.match(/^\/s\/(.+)$/)?.[1];
+    const decoded = w.ExileShare.readBoardAt(key, sent.hash);
+    equal(decoded.lang, 'en', 'Newly shared language');
+    equal(decoded.ids.join(','), ids.join(','), 'Newly shared signs and ordering');
+    equal(Boolean(key), hosted, 'Hosted path or portable standalone fragment');
+    if (!hosted) equal(sent.pathname + sent.search, '/standalone/index.html?via=test', 'Standalone URL');
+    click('[data-act=export]');
+    click('[data-act=save-card]');
+    equal(card.lang, 'en', 'PNG language');
+    equal(card.words.join(','), ids.join(','), 'PNG signs and ordering');
+    equal(w.location.href, original, 'Export leaves incoming link intact');
+  }
+  // Same fragment under a different preview key must revalidate the path.
+  const original = new URL(codec.createBoardLink(short, 'ko'));
+  original.hash = codec.boardHash(short, 'ko');
+  const different = new URL(codec.createBoardLink(['snake'], 'ko'));
+  different.hash = original.hash;
+  const {w, d} = await boot({path:original.href, saved:'ja', languages:['en-GB']});
+  equal(d.documentElement.lang, 'ja', 'Persisted recipient preference on a shared page');
+  equal(d.querySelectorAll('.board-slot').length, short.length, 'Valid key with matching fragment');
+  w.history.pushState(null, '', different.href);
+  w.dispatchEvent(new w.PopStateEvent('popstate'));
+  equal(d.querySelectorAll('.board-slot').length, 0, 'Different key with same fragment rejected');
+  frame.remove();
+}
+</script>

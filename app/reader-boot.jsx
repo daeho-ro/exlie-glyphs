@@ -22,7 +22,7 @@ export default function ReaderBoot({ sources }) {
       const main = document.getElementById('app');
       if (main) {
         main.setAttribute('role', 'alert');
-        main.textContent = '문자판을 불러오지 못했습니다. 페이지를 새로고침해 주세요.';
+        main.textContent = 'The board could not load. Please refresh the page.';
       }
       console.error(error);
     });

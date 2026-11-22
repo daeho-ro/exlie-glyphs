@@ -1,3 +1,4 @@
+import './build-share-codes.mjs';
 import { cp, mkdir, readdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <script id="exile-gtm-bootstrap">
@@ -9,7 +9,7 @@
 
         const layer = window.dataLayer = window.dataLayer || [];
         function gtag() { layer.push(arguments); }
-        gtag('set', 'page_location', location.origin + location.pathname);
+        gtag('set', 'page_location', location.origin + (location.pathname.startsWith('/s/') ? '/s/' : location.pathname));
         layer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
 
         const first = document.getElementsByTagName('script')[0];
@@ -24,9 +24,9 @@
     <meta name="theme-color" content="#f7f5ef" />
     <meta
       name="description"
-      content="기호를 골라 나만의 유배지 문자열을 이미지로 저장하세요. 문자판 링크를 열면 같은 기호를 보고 풀이를 펼칠 수 있습니다."
+      content="Build a board with the Exile glyphs from The Devil’s Plan: Dead Again. Look up symbols, read a photo, and share a board with friends as an image or a link."
     />
-    <title>Exile Glyphs · 유배지 문자열 생성기</title>
+    <title>Exile Glyphs · Exile glyph generator</title>
     <link rel="icon" type="image/svg+xml" href="assets/inscription.svg" />
     <link rel="stylesheet" href="assets/font.css" />
     <link rel="stylesheet" href="assets/pretendard/pretendard.css" />
@@ -39,6 +39,7 @@
     <script defer src="examples.js"></script>
     <script defer src="engine.js"></script>
     <script defer src="dictionary.js"></script>
+    <script defer src="board-links.js"></script>
     <script defer src="share.js"></script>
     <script defer src="ocr.js"></script>
     <script defer src="ocr-clipboard.js"></script>
@@ -64,19 +65,21 @@
         </a>
         <nav id="nav"></nav>
         <div class="global">
-          <button id="help" class="help-icon" aria-label="사용 안내"></button
+          <button id="help" class="help-icon" aria-label="How to use"></button
           ><label class="select-box global-select"
             ><span id="globe"></span
-            ><select id="locale" aria-label="화면 언어 / Interface language">
+            ><select id="locale" aria-label="Interface language">
               <option value="ko">한국어</option>
-              <option value="en">English</option>
+              <option value="en" selected>English</option>
               <option value="ja">日本語</option>
             </select></label
           >
         </div>
       </div>
     </header>
-    <main id="app" tabindex="-1"></main>
+    <main id="app" tabindex="-1">
+      <div class="intro temple-hero"><div class="hero-text"><h1>Exile glyph generator</h1></div></div>
+    </main>
     <footer>
       <div>
         <span class="footer-word">Exile Glyphs</span>
@@ -89,11 +92,11 @@
     <dialog id="dialog" aria-labelledby="dialog-title">
       <div class="dialog-top">
         <h2 id="dialog-title"></h2>
-        <button id="close" class="square" aria-label="닫기"></button>
+        <button id="close" class="square" aria-label="Close"></button>
       </div>
       <div id="dialog-body"></div>
     </dialog>
     <div id="toast" role="status" aria-live="polite"></div>
-    <noscript>Exile Glyphs requires JavaScript.</noscript>
+    <noscript>Enable JavaScript to build a glyph board and reveal its readings.</noscript>
   </body>
 </html>

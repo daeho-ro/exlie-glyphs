@@ -16,80 +16,23 @@
     });
   }
 
-  // Wire constants are permanent and independent of UI language or dictionary order.
-  // The high nibble of the first byte is the format version, the low nibble is
-  // the language. A glyph is a 16-bit word: 4 class bits, 1 colour bit, 11 root bits.
-  const LINK_CLASSES = "NVADQORLJPXM";
-  const LINK_LANGUAGES = ["ko", "en", "ja"];
-  const HEADER_V3 = 0x30;
-  const GLYPH_CODE = /^[NVADQORLJPXM][BC][0-9A-Z]{2}$/;
-  const V2_HASH = /^#b=2\.([0-9A-Z]+)\.(ko|en|ja)(?:&s=[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[89abAB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$/;
-
-  function idForCode(code) {
-    const id = window.ExileCodes.byCode[code];
-    return window.ExileReading.byId.has(id) && window.ExileCodes.byId[id] === code ? id : null;
+  let linkCodec;
+  function links() {
+    return linkCodec ??= globalThis.ExileBoardLinks.create(
+      window.ExileReading.tokens.map(({id}) => [id, window.ExileCodes.byId[id]])
+    );
   }
-
-  function base64url(bytes) {
-    return btoa(bytes).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  }
-
-  function boardHash(ids, lang = "ko") {
-    if (!Array.isArray(ids) || !ids.length) throw new RangeError("A challenge needs at least one glyph.");
-    const language = LINK_LANGUAGES.indexOf(lang);
-    if (language < 0) throw new RangeError("Unsupported reading language.");
-    let bytes = String.fromCharCode(HEADER_V3 + language);
-    for (const id of ids) {
-      const code = window.ExileCodes.byId[id];
-      if (!GLYPH_CODE.test(code) || idForCode(code) !== id) throw new Error("Unknown challenge word.");
-      const packed = (LINK_CLASSES.indexOf(code[0]) << 12)
-        | (code[1] === "C" ? 0x0800 : 0)
-        | parseInt(code.slice(2), 36);
-      bytes += String.fromCharCode(packed >> 8, packed & 255);
-    }
-    return "#b=" + base64url(bytes);
-  }
+  const boardHash = (ids, lang = "ko") => links().boardHash(ids, lang);
+  const parseShareKey = (key) => links().parseShareKey(key);
+  const readBoardAt = (key, hash = location.hash) => links().readBoardAt(key, hash);
 
   function createBoardLink(ids, lang = "ko") {
     if (!["http:", "https:"].includes(location.protocol)) throw new Error("A hosted board is needed to create a link.");
-    const url = new URL("/", location.origin);
-    url.hash = boardHash(ids, lang);
-    return url.href;
+    return new URL(links().sharePath(ids, lang), location.origin).href;
   }
 
   function readBoardLink(hash = location.hash) {
-    if (typeof hash !== "string") return null;
-    const legacy = V2_HASH.exec(hash);
-    if (legacy) {
-      const [, packed, lang] = legacy;
-      if (packed.length % 4 !== 0) return null;
-      const ids = [];
-      for (let i = 0; i < packed.length; i += 4) {
-        const id = idForCode(packed.slice(i, i + 4));
-        if (id === null) return null;
-        ids.push(id);
-      }
-      return {ids, lang};
-    }
-    const match = /^#b=([A-Za-z0-9_-]+)$/.exec(hash);
-    if (!match || match[1].length % 4 === 1) return null;
-    const payload = match[1];
-    const bytes = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
-    if (bytes.length < 3 || bytes.length % 2 !== 1 || base64url(bytes) !== payload) return null;
-    const lang = LINK_LANGUAGES[bytes.charCodeAt(0) - HEADER_V3];
-    if (!lang) return null;
-    const ids = [];
-    for (let i = 1; i < bytes.length; i += 2) {
-      const value = (bytes.charCodeAt(i) << 8) | bytes.charCodeAt(i + 1);
-      const prefix = LINK_CLASSES[value >> 12];
-      const root = value & 0x07ff;
-      if (!prefix || root >= 36 * 36) return null;
-      const code = prefix + (value & 0x0800 ? "C" : "B") + root.toString(36).toUpperCase().padStart(2, "0");
-      const id = idForCode(code);
-      if (id === null) return null;
-      ids.push(id);
-    }
-    return {ids, lang};
+    return links().readHash(hash);
   }
 
   async function prepareFont(words) {
@@ -226,7 +169,7 @@
   async function png(ids, lang = document.documentElement.lang, showReading = false) {
     const words = getWords(ids);
     const reader = window.ExileReading;
-    const locale = reader.languages.includes(lang) ? lang : "ko";
+    const locale = reader.languages.includes(lang) ? lang : "en";
     const sentence = showReading ? reader.read(ids, locale).example?.texts[locale] : "";
     const count = {ko:"문자 " + words.length + "개", en:words.length + (words.length === 1 ? " glyph" : " glyphs"), ja:words.length + " 文字"}[locale];
     const labels = showReading ? [...new Set(words.map(word => word.labels[locale]))].join(" ") : "";
@@ -298,5 +241,5 @@
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
 
-  window.ExileShare = {boardHash, createBoardLink, readBoardLink, png, download};
+  window.ExileShare = {boardHash, createBoardLink, readBoardLink, parseShareKey, readBoardAt, png, download};
 })();

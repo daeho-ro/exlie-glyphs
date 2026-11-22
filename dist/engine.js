@@ -25,8 +25,8 @@
   const exampleFor = new Map(
     examples.map((example) => [example.ids.join('|'), example]),
   );
-  function read(ids, lang = 'ko') {
-    const locale = languages.includes(lang) ? lang : 'ko';
+  function read(ids, lang = 'en') {
+    const locale = languages.includes(lang) ? lang : 'en';
     const words = ids.map((id) => {
       const word = byId.get(id);
       if (!word) throw new RangeError('Unknown glyph');

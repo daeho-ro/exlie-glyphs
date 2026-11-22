@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Exile Glyphs</title>
+  <link rel="stylesheet" href="../dist/assets/font.css">
+  <script src="../dist/assets/glyph-map.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+    body {
+      display: grid;
+      place-items: center;
+      color: #f5e5c8;
+      background:
+        radial-gradient(ellipse at 50% 104%, #98825624, transparent 67%),
+        linear-gradient(110deg, #0f1d1b, #22312b 60%, #18251e);
+    }
+    main {
+      width: 1080px;
+      padding: 0 50px;
+      border: 1px solid #a78a5d55;
+      border-radius: 15px;
+      background:
+        repeating-linear-gradient(0deg, #a78a5d0e 0 1px, transparent 1px 64px),
+        repeating-linear-gradient(90deg, #a78a5d0e 0 1px, transparent 1px 64px);
+    }
+    header {
+      height: 155px;
+      display: flex;
+      align-items: center;
+      gap: 19px;
+      border-bottom: 1px solid #a78a5d76;
+      color: #fbefd7;
+      font: 600 61px/1 'Baskervville', 'Iowan Old Style', Georgia, serif;
+      letter-spacing: -.035em;
+    }
+    header img { width: 67px; height: 67px; }
+    .inscription {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      height: 308px;
+      align-items: center;
+      text-align: center;
+      color: #efdbaf;
+      font: 192px/1 ExileGlyphs;
+    }
+  </style>
+</head>
+<body>
+  <!-- Capture this document at 1200 × 630 after document.fonts.ready. -->
+  <main>
+    <header><img alt="" src="../dist/assets/inscription.svg">Exile Glyphs</header>
+    <div class="inscription" aria-hidden="true"></div>
+  </main>
+  <script>
+    const inscription = document.querySelector('.inscription');
+    for (const sign of ['bird', 'see', 'snake', 'spider']) {
+      const cell = document.createElement('span');
+      cell.textContent = String.fromCodePoint(window.ExileGlyphMap[sign]);
+      inscription.append(cell);
+    }
+  </script>
+</body>
+</html>

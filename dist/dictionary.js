@@ -30,7 +30,7 @@
       conjunction: '接続詞', pronoun: '代名詞', preposition: '前置詞', auxiliary: '助動詞', marker: '標識',
     },
   };
-  let locale = 'ko';
+  let locale = 'en';
   let query = '';
   const groups = ['noun', 'verb', 'adjective', 'adverb', 'numbers', 'functionWords', 'phrase'];
   const groupByPos = {
@@ -77,7 +77,7 @@
     }).join('');
   }
   function page(language) {
-    locale = Object.hasOwn(dictionary, language) ? language : 'ko';
+    locale = Object.hasOwn(dictionary, language) ? language : 'en';
     return `<h1 id="dictionary-title">${text('title')}</h1>
       <label class="dict-search"><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/></svg>
       <input id="query" type="search" class="field" aria-label="${text('search')}" placeholder="${text('search')}" value="${escape(query)}"></label><div id="dx-results">${resultBody()}</div>`;
