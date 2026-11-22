@@ -6,7 +6,7 @@ const zlib = require('node:zlib');
 
 const root = path.join(__dirname, '..');
 const renderer = Promise.all([
-  import('../social/card-raster.js'),
+  import('../social/card-raster.ts'),
   fs.readFile(path.join(root, 'social/assets/board-art.bin')),
   fs.readFile(path.join(root, 'social/assets/author-glyphs.bin')),
 ]).then(([{createBoardRenderer}, data, authors]) => createBoardRenderer(
@@ -30,7 +30,7 @@ function pixels(png) {
 
 test('PNG retains empty slots and repeated signs in their original positions', async () => {
   const render=await renderer;
-  const {placement} = await import('../social/card-layout.js');
+  const {placement} = await import('../social/card-layout.ts');
   const image=pixels(await render({ids:['zero','spider','zero','spider'],lang:'ko'}));
   const masks=placement(4).map(({x,y,size})=>{
     const rows=[];

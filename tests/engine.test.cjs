@@ -9,7 +9,7 @@ for (const name of ["assets/glyph-map", "assets/glyph-codes", "catalog", "exampl
 const reader = window.ExileReading;
 const share = window.ExileShare;
 const codes = window.ExileCodes;
-const edge = import("../social/board-link.js");
+const edge = import("../social/board-link.ts");
 const shareKey = url => new URL(url).pathname.split("/")[2];
 
 test("the browser and edge decode every selectable sign in all reading languages", async () => {

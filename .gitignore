@@ -6,3 +6,9 @@ public/reader/
 social/assets/board-art.bin
 social/reader-shell.html
 .wrangler/
+# Browser scripts and the edge lookup table are compiled from reader/.
+dist/*.js
+dist/assets/glyph-codes.js
+social/selectable-codes.js
+next-env.d.ts
+*.tsbuildinfo

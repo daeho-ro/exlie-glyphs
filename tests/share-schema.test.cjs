@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { boardSchemaScript } = require('../social/share-schema.js');
+const { boardSchemaScript } = require('../social/share-schema.ts');
 
 test('shared page JSON-LD preserves an optional free-text credit inside one script', () => {
   const url = 'https://exile-glyphs.net/s/MEABJFEDoA';

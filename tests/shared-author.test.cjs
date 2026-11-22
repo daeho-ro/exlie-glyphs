@@ -1,9 +1,9 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { normalizeAuthor } = require('../social/board-link.js');
-const { sharedBoard, shareUrl } = require('../social/share-response.js');
+const { normalizeAuthor } = require('../social/board-link.ts');
+const { sharedBoard, shareUrl } = require('../social/share-response.ts');
 
-const { onRequest: shareMiddleware } = require('../functions/s/_middleware.js');
+const { onRequest: shareMiddleware } = require('../functions/s/_middleware.ts');
 const key = 'MEABJFEDoA';
 const origin = 'https://exile-glyphs.net';
 const base = '/s/' + key;
